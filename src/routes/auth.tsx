@@ -100,10 +100,15 @@ function SignInForm() {
       onSubmit={async (e) => {
         e.preventDefault();
         setBusy(true);
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        setBusy(false);
-        if (error) toast.error(error.message);
-        else toast.success("Welcome back");
+        try {
+          const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+          if (error) toast.error(error.message);
+          else toast.success("Welcome back");
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : "Unable to sign in. Try again.");
+        } finally {
+          setBusy(false);
+        }
       }}
     >
       <div>
@@ -141,19 +146,24 @@ function SignUpForm() {
       onSubmit={async (e) => {
         e.preventDefault();
         setBusy(true);
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: { display_name: displayName },
-          },
-        });
-        setBusy(false);
-        if (error) toast.error(error.message);
-        else {
-          setSent(true);
-          toast.success("Confirmation sent");
+        try {
+          const { error } = await supabase.auth.signUp({
+            email: email.trim(),
+            password,
+            options: {
+              emailRedirectTo: window.location.origin,
+              data: { display_name: displayName.trim() },
+            },
+          });
+          if (error) toast.error(error.message);
+          else {
+            setSent(true);
+            toast.success("Confirmation sent");
+          }
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : "Unable to create your account. Try again.");
+        } finally {
+          setBusy(false);
         }
       }}
     >

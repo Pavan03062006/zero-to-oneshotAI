@@ -92,6 +92,8 @@ function StoryDNA() {
 
       {q.isLoading ? (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">{Array.from({length:6}).map((_,i)=><Skeleton key={i} className="h-32 rounded-xl" />)}</div>
+      ) : q.error ? (
+        <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm">Unable to load Story DNA. Refresh to retry.</div>
       ) : filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border/60 bg-card/30 p-10 text-center text-sm text-muted-foreground">
           No {filter === "all" ? "entities" : label(filter).toLowerCase()} yet. Add one to seed your Story DNA.

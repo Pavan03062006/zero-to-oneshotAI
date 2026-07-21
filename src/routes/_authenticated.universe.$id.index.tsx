@@ -18,7 +18,7 @@ function Overview() {
   const issues = useQuery({ queryKey: ["issues", id], queryFn: () => listIssues(id) });
   const events = useQuery({ queryKey: ["events", id], queryFn: () => listEvents(id) });
 
-  const loading = entities.isLoading || docs.isLoading || issues.isLoading;
+  const loading = entities.isLoading || docs.isLoading || issues.isLoading || events.isLoading;
   const characters = (entities.data ?? []).filter((e) => e.entity_type === "character");
   const approved = (entities.data ?? []).filter((e) => e.canon_status === "approved").length;
   const proposed = (entities.data ?? []).filter((e) => e.canon_status === "proposed").length;
@@ -27,6 +27,7 @@ function Overview() {
   const health = approved + proposed === 0 ? 0 : Math.round((approved / (approved + proposed)) * 100);
 
   if (loading) return <div className="grid gap-4 md:grid-cols-3">{Array.from({length: 6}).map((_,i)=><Skeleton key={i} className="h-32 rounded-xl" />)}</div>;
+  if (entities.error || docs.error || issues.error || events.error) return <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm">Unable to load this universe overview. Refresh to retry.</div>;
 
   return (
     <div className="space-y-8">

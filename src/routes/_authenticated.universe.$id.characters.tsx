@@ -19,6 +19,7 @@ function Characters() {
   const chars = (q.data ?? []).filter((e) => e.entity_type === "character");
 
   if (q.isLoading) return <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{Array.from({length:4}).map((_,i)=><Skeleton key={i} className="h-56 rounded-xl" />)}</div>;
+  if (q.error || rels.error) return <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm">Unable to load characters. Refresh to retry.</div>;
   if (chars.length === 0) return (
     <div className="rounded-xl border border-dashed border-border/60 bg-card/30 p-10 text-center text-sm text-muted-foreground">
       No characters yet. Add a character in Story DNA and their goal, fear, voice, and arc will surface here.

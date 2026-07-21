@@ -3,11 +3,14 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, LayoutDashboard, Plus } from "lucide-react";
+import { LogOut, LayoutDashboard, Plus, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { useState } from "react";
 import type { ReactNode } from "react";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, signOut } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
   const nav = useNavigate();
   const displayName =
     (user?.user_metadata?.display_name as string | undefined) ??
@@ -52,11 +55,19 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={async () => {
-                    await signOut();
-                    nav({ to: "/", replace: true });
+                    if (signingOut) return;
+                    setSigningOut(true);
+                    try {
+                      await signOut();
+                      nav({ to: "/", replace: true });
+                    } catch (error) {
+                      setSigningOut(false);
+                      toast.error(error instanceof Error ? error.message : "Could not sign out. Try again.");
+                    }
                   }}
+                  disabled={signingOut}
                 >
-                  <LogOut className="mr-2 h-4 w-4" /> Sign out
+                  {signingOut ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogOut className="mr-2 h-4 w-4" />} {signingOut ? "Signing out…" : "Sign out"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

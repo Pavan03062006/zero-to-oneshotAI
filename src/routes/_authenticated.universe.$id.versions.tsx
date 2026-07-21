@@ -21,6 +21,7 @@ function Versions() {
   const revs = useQuery({ queryKey: ["revisions", active], queryFn: () => listRevisions(active!), enabled: !!active });
 
   if (docs.isLoading) return <Skeleton className="h-64 rounded-xl" />;
+  if (docs.error) return <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm">Unable to load chapters. Refresh to retry.</div>;
   if (!docs.data || docs.data.length === 0) return (
     <div className="rounded-xl border border-dashed border-border/60 p-10 text-center text-sm text-muted-foreground">
       No chapters yet — versions appear once a chapter has revisions.
@@ -38,7 +39,7 @@ function Versions() {
         ))}
       </aside>
       <div className="space-y-3">
-        {revs.isLoading ? <Skeleton className="h-32 rounded-xl" /> :
+        {revs.isLoading ? <Skeleton className="h-32 rounded-xl" /> : revs.error ? <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm">Unable to load revisions. Refresh to retry.</div> :
           (revs.data ?? []).length === 0 ? (
             <div className="rounded-xl border border-dashed border-border/60 p-10 text-center text-sm text-muted-foreground">
               <History className="h-5 w-5 mx-auto mb-2 text-primary" />

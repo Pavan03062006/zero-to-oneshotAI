@@ -19,6 +19,7 @@ function TimelinePage() {
   const [active, setActive] = useState<string | "all">("all");
 
   if (tls.isLoading || evs.isLoading) return <Skeleton className="h-96 rounded-xl" />;
+  if (tls.error || evs.error) return <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm">Unable to load the timeline. Refresh to retry.</div>;
   const timelines = tls.data ?? [];
   const events = (evs.data ?? []).filter((e) => active === "all" || e.timeline_id === active);
 

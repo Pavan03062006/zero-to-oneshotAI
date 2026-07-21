@@ -23,13 +23,15 @@ const TABS: { to: any; label: string; icon: any; exact?: boolean }[] = [
 function UniverseShell() {
   const { id } = useParams({ from: "/_authenticated/universe/$id" });
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { data: p, isLoading } = useQuery({ queryKey: ["project", id], queryFn: () => getProject(id) });
+  const { data: p, isLoading, error } = useQuery({ queryKey: ["project", id], queryFn: () => getProject(id) });
 
   return (
     <div className="border-b border-border/60 bg-plum">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-8 pb-0">
         {isLoading ? (
           <Skeleton className="h-10 w-64" />
+        ) : error ? (
+          <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm">Unable to load this universe. Refresh to retry.</div>
         ) : p ? (
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>

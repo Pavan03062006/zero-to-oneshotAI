@@ -138,7 +138,13 @@ function NewUniverse() {
               <ArrowLeft className="mr-1 h-4 w-4" /> Back
             </Button>
             {step < STEPS.length - 1 ? (
-              <Button onClick={() => setStep((s) => s + 1)}>
+              <Button onClick={() => {
+                if (step === 0 && !premise.trim()) {
+                  toast.error("Add a short story spark before continuing.");
+                  return;
+                }
+                setStep((s) => s + 1);
+              }}>
                 Continue <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             ) : (

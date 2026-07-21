@@ -33,6 +33,7 @@ function Chapters() {
   });
 
   if (docs.isLoading) return <Skeleton className="h-96 rounded-xl" />;
+  if (docs.error) return <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm">Unable to load chapters. Refresh to retry.</div>;
   const list = docs.data ?? [];
 
   return (
@@ -40,7 +41,7 @@ function Chapters() {
       <aside className="space-y-1">
         <div className="flex items-center justify-between mb-2">
           <div className="text-xs uppercase tracking-wider text-muted-foreground">Chapters</div>
-          <Button size="sm" variant="ghost" onClick={() => create.mutate()}><Plus className="h-4 w-4" /></Button>
+          <Button size="sm" variant="ghost" onClick={() => create.mutate()} disabled={create.isPending} aria-label="Add chapter"><Plus className="h-4 w-4" /></Button>
         </div>
         {list.length === 0 ? (
           <div className="text-xs text-muted-foreground rounded-md border border-dashed border-border/60 p-4">No chapters yet.</div>
@@ -60,7 +61,9 @@ function Chapters() {
 
       <aside className="space-y-3">
         <div className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1"><ShieldAlert className="h-3 w-3" /> Continuity</div>
-        {(issues.data ?? []).filter((i) => i.status === "open").slice(0,5).length === 0 ? (
+        {issues.error ? (
+          <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs">Unable to load continuity issues.</div>
+        ) : (issues.data ?? []).filter((i) => i.status === "open").slice(0,5).length === 0 ? (
           <div className="rounded-md border border-border/60 bg-card/40 p-3 text-xs text-muted-foreground">Clean canon so far. The engine is watching every save.</div>
         ) : (issues.data ?? []).filter((i) => i.status === "open").slice(0,5).map((i) => (
           <div key={i.id} className="rounded-md border border-border/60 bg-card/60 p-3">
@@ -123,6 +126,7 @@ function Editor({ docId }: { docId: string }) {
   }, [title, content]);
 
   if (q.isLoading) return <Skeleton className="h-96 rounded-xl" />;
+  if (q.error || !q.data) return <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm">Unable to load this chapter. Select it again or refresh to retry.</div>;
 
   return (
     <div className="rounded-xl border border-border/60 bg-card/40 p-5 flex flex-col">

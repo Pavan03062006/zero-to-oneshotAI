@@ -92,7 +92,7 @@ function Continuity() {
         </div>
       </div>
 
-      {q.isLoading ? <Skeleton className="h-96 rounded-3xl" /> : filtered.length === 0 ? (
+      {q.isLoading || docs.isLoading ? <Skeleton className="h-96 rounded-3xl" /> : q.error || docs.error ? <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm">Unable to load continuity data. Refresh to retry.</div> : filtered.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-border/60 p-10 text-center">
           <ShieldCheck className="h-6 w-6 mx-auto text-primary" />
           <div className="text-lg font-medium mt-2">No continuity issues here</div>

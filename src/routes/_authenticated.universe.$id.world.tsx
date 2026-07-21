@@ -21,6 +21,7 @@ function World() {
   const { id } = useParams({ from: "/_authenticated/universe/$id/world" });
   const q = useQuery({ queryKey: ["entities", id], queryFn: () => listEntities(id) });
   if (q.isLoading) return <Skeleton className="h-64 rounded-xl" />;
+  if (q.error) return <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm">Unable to load the world data. Refresh to retry.</div>;
   const entities = q.data ?? [];
   return (
     <div className="space-y-8">
