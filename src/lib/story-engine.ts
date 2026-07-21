@@ -10,7 +10,7 @@ export interface GenerateStoryDnaResult {
   themes: string[];
   entities: Array<Record<string, unknown>>;
   events: Array<Record<string, unknown>>;
-  document: { id: string; title: string; status: string };
+  document: { id: string; title: string; status: string } | null;
 }
 
 export interface AnalyzeContinuityResult {
@@ -64,8 +64,15 @@ async function parseFunctionsError(err: unknown): Promise<StoryEngineError> {
     } catch {
       /* ignore */
     }
+    const structured =
+      body && typeof body === "object" && body.error && typeof body.error === "object"
+        ? body.error
+        : null;
     const msg =
-      (body && typeof body === "object" && (body.error || body.message)) ||
+      structured?.message ||
+      (body &&
+        typeof body === "object" &&
+        (typeof body.error === "string" ? body.error : body.message)) ||
       (typeof body === "string" ? body : "") ||
       err.message;
     let friendly = msg;
@@ -81,7 +88,11 @@ async function parseFunctionsError(err: unknown): Promise<StoryEngineError> {
         ? "The story engine hit an error. Try again shortly."
         : String(msg);
     }
-    return new StoryEngineError(String(msg), { status, code: body?.code, friendly });
+    return new StoryEngineError(String(msg), {
+      status,
+      code: structured?.code ?? body?.code,
+      friendly,
+    });
   }
   if (err instanceof Error) {
     const isNetwork = /failed to fetch|network|load failed/i.test(err.message);

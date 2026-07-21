@@ -5,8 +5,7 @@ import { listDocuments, listRevisions } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { GitCompare, RotateCcw, History } from "lucide-react";
-import { toast } from "sonner";
+import { History } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/universe/$id/versions")({
   component: Versions,
@@ -74,24 +73,7 @@ function Versions() {
                     {new Date(r.created_at).toLocaleString()} · {r.created_by ? "you" : "system"}
                   </div>
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-1.5"
-                    onClick={() => toast.message("Compare view coming to your studio")}
-                  >
-                    <GitCompare className="h-3.5 w-3.5" /> Compare
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="gap-1.5"
-                    onClick={() => toast.message("Restored to this revision")}
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" /> Restore
-                  </Button>
-                </div>
+                <div className="flex gap-2 shrink-0"></div>
               </CardContent>
             </Card>
           ))

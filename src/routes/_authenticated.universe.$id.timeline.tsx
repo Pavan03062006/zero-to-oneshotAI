@@ -51,81 +51,94 @@ function TimelinePage() {
   const events = (evs.data ?? []).filter((e) => active === "all" || e.timeline_id === active);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
-      <aside className="space-y-2">
-        <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Timelines</div>
-        <button onClick={() => setActive("all")} className={chip(active === "all")}>
-          All threads
-        </button>
-        {timelines.map((t) => (
-          <button key={t.id} onClick={() => setActive(t.id)} className={chip(active === t.id)}>
-            <span className="flex items-center gap-1.5">
-              {t.is_primary ? (
-                <Sparkles className="h-3 w-3 text-primary" />
-              ) : (
-                <GitBranch className="h-3 w-3 text-accent" />
-              )}
-              {t.name}
-            </span>
-          </button>
-        ))}
-        <BranchDialog
-          projectId={id}
-          parentTimelineId={
-            active === "all"
-              ? (timelines.find((timeline) => timeline.is_primary)?.id ?? null)
-              : active
-          }
-          onCreated={(timelineId) => {
-            qc.invalidateQueries({ queryKey: ["timelines", id] });
-            setActive(timelineId);
-          }}
-        />
-        <EventDialog
-          projectId={id}
-          timelineId={
-            active === "all"
-              ? (timelines.find((timeline) => timeline.is_primary)?.id ?? null)
-              : active
-          }
-          nextOrder={events.length}
-          onCreated={() => qc.invalidateQueries({ queryKey: ["events", id] })}
-        />
-      </aside>
-
-      <div className="relative pl-6">
-        <div className="absolute left-2 top-2 bottom-2 w-px bg-gradient-to-b from-primary/60 via-accent/40 to-transparent" />
-        {events.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border/60 p-10 text-center text-sm text-muted-foreground">
-            No events on this timeline yet. Story events appear here as you draft chapters and
-            confirm canon.
+    <div className="space-y-6">
+      <header>
+        <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          Story Timeline
+        </div>
+        <h1 className="mt-2 font-serif text-4xl">The events shaping your story</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          A chronological view of the events currently recorded in your story.
+        </p>
+      </header>
+      <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
+        <aside className="space-y-2">
+          <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+            Timelines
           </div>
-        ) : (
-          events.map((e) => (
-            <div key={e.id} className="relative pl-6 pb-8">
-              <div className="absolute -left-0.5 top-1.5 h-3 w-3 rounded-full bg-primary shadow-glow" />
-              <div className="text-xs text-muted-foreground">
-                {e.story_time ?? `Sequence ${e.sequence_order}`}
-              </div>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="font-serif text-lg">{e.title}</div>
-                <CanonPill status={e.canon_status} />
-              </div>
-              {e.description && (
-                <p className="text-sm text-muted-foreground mt-1 max-w-2xl">{e.description}</p>
-              )}
-              {e.timeline_id && (
-                <Badge variant="outline" className="mt-2 text-[10px]">
-                  {timelines.find((t) => t.id === e.timeline_id)?.name ?? "Timeline"}
-                </Badge>
-              )}
-              <EventEditor
-                event={e}
-                onSaved={() => qc.invalidateQueries({ queryKey: ["events", id] })}
-              />
+          <button onClick={() => setActive("all")} className={chip(active === "all")}>
+            All threads
+          </button>
+          {timelines.map((t) => (
+            <button key={t.id} onClick={() => setActive(t.id)} className={chip(active === t.id)}>
+              <span className="flex items-center gap-1.5">
+                {t.is_primary ? (
+                  <Sparkles className="h-3 w-3 text-primary" />
+                ) : (
+                  <GitBranch className="h-3 w-3 text-accent" />
+                )}
+                {t.name}
+              </span>
+            </button>
+          ))}
+          <BranchDialog
+            projectId={id}
+            parentTimelineId={
+              active === "all"
+                ? (timelines.find((timeline) => timeline.is_primary)?.id ?? null)
+                : active
+            }
+            onCreated={(timelineId) => {
+              qc.invalidateQueries({ queryKey: ["timelines", id] });
+              setActive(timelineId);
+            }}
+          />
+          <EventDialog
+            projectId={id}
+            timelineId={
+              active === "all"
+                ? (timelines.find((timeline) => timeline.is_primary)?.id ?? null)
+                : active
+            }
+            nextOrder={events.length}
+            onCreated={() => qc.invalidateQueries({ queryKey: ["events", id] })}
+          />
+        </aside>
+
+        <div className="relative pl-6">
+          <div className="absolute left-2 top-2 bottom-2 w-px bg-gradient-to-b from-primary/60 via-accent/40 to-transparent" />
+          {events.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border/60 p-10 text-center text-sm text-muted-foreground">
+              No events on this timeline yet. Story events appear here as you draft chapters and
+              confirm canon.
             </div>
-          ))
-        )}
+          ) : (
+            events.map((e) => (
+              <div key={e.id} className="relative pl-6 pb-8">
+                <div className="absolute -left-0.5 top-1.5 h-3 w-3 rounded-full bg-primary shadow-glow" />
+                <div className="text-xs text-muted-foreground">
+                  {e.story_time ?? `Sequence ${e.sequence_order}`}
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="font-serif text-lg">{e.title}</div>
+                  <CanonPill status={e.canon_status} />
+                </div>
+                {e.description && (
+                  <p className="text-sm text-muted-foreground mt-1 max-w-2xl">{e.description}</p>
+                )}
+                {e.timeline_id && (
+                  <Badge variant="outline" className="mt-2 text-[10px]">
+                    {timelines.find((t) => t.id === e.timeline_id)?.name ?? "Timeline"}
+                  </Badge>
+                )}
+                <EventEditor
+                  event={e}
+                  onSaved={() => qc.invalidateQueries({ queryKey: ["events", id] })}
+                />
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

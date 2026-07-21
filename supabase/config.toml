@@ -1,0 +1,19 @@
+project_id = "oneshot-local"
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+[db]
+port = 54322
+major_version = 15
+[studio]
+enabled = true
+port = 54323
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:5173"]
+[functions.story-engine]
+# Authentication is verified inside the function so all failures use the structured error contract.
+verify_jwt = false

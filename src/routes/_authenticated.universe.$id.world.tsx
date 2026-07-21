@@ -1,10 +1,12 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { listEntities } from "@/lib/queries";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CanonPill } from "./_authenticated.universe.$id.dna";
-import { Globe2, Users2, Package, ScrollText } from "lucide-react";
+import { Globe2, Users2, Package, ScrollText, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/_authenticated/universe/$id/world")({
   component: World,
@@ -20,6 +22,7 @@ const GROUPS = [
 function World() {
   const { id } = useParams({ from: "/_authenticated/universe/$id/world" });
   const q = useQuery({ queryKey: ["entities", id], queryFn: () => listEntities(id) });
+  const [search, setSearch] = useState("");
   if (q.isLoading) return <Skeleton className="h-64 rounded-xl" />;
   if (q.error)
     return (
@@ -30,8 +33,30 @@ function World() {
   const entities = q.data ?? [];
   return (
     <div className="space-y-8">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="font-serif text-3xl">World</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            The places, systems, and forces behind your story.
+          </p>
+        </div>
+        <div className="relative w-64">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search the world…"
+            className="pl-9"
+            aria-label="Search world"
+          />
+        </div>
+      </div>
       {GROUPS.map(({ key, label, icon: I }) => {
-        const rows = entities.filter((e) => e.entity_type === key);
+        const rows = entities.filter(
+          (e) =>
+            e.entity_type === key &&
+            `${e.name} ${e.summary ?? ""}`.toLowerCase().includes(search.toLowerCase()),
+        );
         return (
           <section key={key}>
             <div className="flex items-center gap-2 mb-3">

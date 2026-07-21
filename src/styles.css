@@ -75,21 +75,21 @@
   --chalk: #ffffff;
 
   /* Semantic shadcn tokens mapped to Caldera */
-  --background: #e2e2df;      /* Pumice canvas */
-  --foreground: #070607;      /* Obsidian text */
-  --card: #f7f6f2;            /* Limestone surface */
+  --background: #e2e2df; /* Pumice canvas */
+  --foreground: #070607; /* Obsidian text */
+  --card: #f7f6f2; /* Limestone surface */
   --card-foreground: #070607;
   --popover: #f7f6f2;
   --popover-foreground: #070607;
-  --primary: #fc5000;         /* Ember */
+  --primary: #fc5000; /* Ember */
   --primary-foreground: #070607;
   --secondary: #f7f6f2;
   --secondary-foreground: #070607;
   --muted: #eeece7;
   --muted-foreground: #5a5854;
-  --accent: #f5f28e;          /* Sulfur */
+  --accent: #f5f28e; /* Sulfur */
   --accent-foreground: #070607;
-  --destructive: #fc5000;     /* Continuity warnings use Ember, not red */
+  --destructive: #fc5000; /* Continuity warnings use Ember, not red */
   --destructive-foreground: #ffffff;
   --border: rgba(7, 6, 7, 0.12);
   --input: rgba(7, 6, 7, 0.16);
@@ -107,14 +107,61 @@
   --sidebar-accent-foreground: #070607;
   --sidebar-border: rgba(7, 6, 7, 0.12);
   --sidebar-ring: #fc5000;
+
+  /* Editorial semantic tokens reconciled with Cinematic Story OS */
+  --canvas: var(--pumice);
+  --canvas-subtle: #e9e8e4;
+  --surface: var(--limestone);
+  --surface-raised: #fffefa;
+  --surface-inset: #eeece7;
+  --surface-editor: #fffefa;
+  --overlay: rgba(7, 6, 7, 0.42);
+  --foreground-secondary: #33312f;
+  --foreground-muted: var(--muted-foreground);
+  --foreground-inverse: var(--chalk);
+  --prose: #262321;
+  --heading: var(--obsidian);
+  --border-subtle: rgba(7, 6, 7, 0.08);
+  --border-strong: rgba(7, 6, 7, 0.22);
+  --focus-ring: var(--ember);
+  --selection: rgba(252, 80, 0, 0.18);
+  --ember-hover: #e94700;
+  --ember-muted: rgba(252, 80, 0, 0.12);
+  --success: #477052;
+  --warning: #9a6500;
+  --critical: #a33b32;
+  --informational: #536b83;
+  --page-width: 1280px;
+  --reading-width: 760px;
+  --motion-fast: 160ms;
+  --motion-standard: 260ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Caldera is a light-only system; the .dark class inherits :root values. */
-.dark { color-scheme: light; }
+.dark {
+  color-scheme: light;
+}
 
 @layer base {
   * {
     border-color: var(--color-border);
+  }
+  ::selection {
+    background: var(--selection);
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
   body {
@@ -124,7 +171,10 @@
     font-weight: 500;
     -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: "Bebas Neue", "Anton", "Oswald", ui-sans-serif, system-ui, sans-serif;
     font-weight: 400;
     letter-spacing: 0.02em;
@@ -140,24 +190,38 @@
     radial-gradient(circle at center, #fc5000 22%, transparent 24%),
     radial-gradient(circle at center, #fc5000 22%, transparent 24%),
     linear-gradient(135deg, #524ae9 0%, #7a3fd0 35%, #fc5000 100%);
-  background-size: 14px 14px, 14px 14px, 100% 100%;
-  background-position: 0 0, 7px 7px, 0 0;
+  background-size:
+    14px 14px,
+    14px 14px,
+    100% 100%;
+  background-position:
+    0 0,
+    7px 7px,
+    0 0;
 }
 @utility halftone-ember {
   background-color: #fc5000;
   background-image:
-    radial-gradient(circle, rgba(255,255,255,0.35) 22%, transparent 24%),
-    radial-gradient(circle, rgba(255,255,255,0.35) 22%, transparent 24%);
-  background-size: 12px 12px, 12px 12px;
-  background-position: 0 0, 6px 6px;
+    radial-gradient(circle, rgba(255, 255, 255, 0.35) 22%, transparent 24%),
+    radial-gradient(circle, rgba(255, 255, 255, 0.35) 22%, transparent 24%);
+  background-size:
+    12px 12px,
+    12px 12px;
+  background-position:
+    0 0,
+    6px 6px;
 }
 @utility halftone-plasma {
   background-color: #524ae9;
   background-image:
     radial-gradient(circle, #fc5000 24%, transparent 26%),
     radial-gradient(circle, #fc5000 24%, transparent 26%);
-  background-size: 14px 14px, 14px 14px;
-  background-position: 0 0, 7px 7px;
+  background-size:
+    14px 14px,
+    14px 14px;
+  background-position:
+    0 0,
+    7px 7px;
 }
 @utility dotted-divider-x {
   background-image: radial-gradient(circle, #070607 1px, transparent 1.2px);

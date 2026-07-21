@@ -9,34 +9,40 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedNewUniverseRouteImport } from './routes/_authenticated.new-universe'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
+import { Route as AuthenticatedNewUniverseRouteImport } from './routes/_authenticated.new-universe'
 import { Route as AuthenticatedUniverseIdRouteImport } from './routes/_authenticated.universe.$id'
 import { Route as AuthenticatedUniverseIdIndexRouteImport } from './routes/_authenticated.universe.$id.index'
-import { Route as AuthenticatedUniverseIdWorldRouteImport } from './routes/_authenticated.universe.$id.world'
-import { Route as AuthenticatedUniverseIdVersionsRouteImport } from './routes/_authenticated.universe.$id.versions'
-import { Route as AuthenticatedUniverseIdTimelineRouteImport } from './routes/_authenticated.universe.$id.timeline'
-import { Route as AuthenticatedUniverseIdDnaRouteImport } from './routes/_authenticated.universe.$id.dna'
-import { Route as AuthenticatedUniverseIdContinuityRouteImport } from './routes/_authenticated.universe.$id.continuity'
-import { Route as AuthenticatedUniverseIdCharactersRouteImport } from './routes/_authenticated.universe.$id.characters'
 import { Route as AuthenticatedUniverseIdChaptersRouteImport } from './routes/_authenticated.universe.$id.chapters'
+import { Route as AuthenticatedUniverseIdCharactersRouteImport } from './routes/_authenticated.universe.$id.characters'
+import { Route as AuthenticatedUniverseIdContinuityRouteImport } from './routes/_authenticated.universe.$id.continuity'
+import { Route as AuthenticatedUniverseIdDnaRouteImport } from './routes/_authenticated.universe.$id.dna'
+import { Route as AuthenticatedUniverseIdMemoryRouteImport } from './routes/_authenticated.universe.$id.memory'
+import { Route as AuthenticatedUniverseIdTimelineRouteImport } from './routes/_authenticated.universe.$id.timeline'
+import { Route as AuthenticatedUniverseIdVersionsRouteImport } from './routes/_authenticated.universe.$id.versions'
+import { Route as AuthenticatedUniverseIdWorldRouteImport } from './routes/_authenticated.universe.$id.world'
 
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedNewUniverseRoute =
   AuthenticatedNewUniverseRouteImport.update({
@@ -44,11 +50,6 @@ const AuthenticatedNewUniverseRoute =
     path: '/new-universe',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedUniverseIdRoute = AuthenticatedUniverseIdRouteImport.update({
   id: '/universe/$id',
   path: '/universe/$id',
@@ -60,34 +61,10 @@ const AuthenticatedUniverseIdIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedUniverseIdRoute,
   } as any)
-const AuthenticatedUniverseIdWorldRoute =
-  AuthenticatedUniverseIdWorldRouteImport.update({
-    id: '/world',
-    path: '/world',
-    getParentRoute: () => AuthenticatedUniverseIdRoute,
-  } as any)
-const AuthenticatedUniverseIdVersionsRoute =
-  AuthenticatedUniverseIdVersionsRouteImport.update({
-    id: '/versions',
-    path: '/versions',
-    getParentRoute: () => AuthenticatedUniverseIdRoute,
-  } as any)
-const AuthenticatedUniverseIdTimelineRoute =
-  AuthenticatedUniverseIdTimelineRouteImport.update({
-    id: '/timeline',
-    path: '/timeline',
-    getParentRoute: () => AuthenticatedUniverseIdRoute,
-  } as any)
-const AuthenticatedUniverseIdDnaRoute =
-  AuthenticatedUniverseIdDnaRouteImport.update({
-    id: '/dna',
-    path: '/dna',
-    getParentRoute: () => AuthenticatedUniverseIdRoute,
-  } as any)
-const AuthenticatedUniverseIdContinuityRoute =
-  AuthenticatedUniverseIdContinuityRouteImport.update({
-    id: '/continuity',
-    path: '/continuity',
+const AuthenticatedUniverseIdChaptersRoute =
+  AuthenticatedUniverseIdChaptersRouteImport.update({
+    id: '/chapters',
+    path: '/chapters',
     getParentRoute: () => AuthenticatedUniverseIdRoute,
   } as any)
 const AuthenticatedUniverseIdCharactersRoute =
@@ -96,10 +73,40 @@ const AuthenticatedUniverseIdCharactersRoute =
     path: '/characters',
     getParentRoute: () => AuthenticatedUniverseIdRoute,
   } as any)
-const AuthenticatedUniverseIdChaptersRoute =
-  AuthenticatedUniverseIdChaptersRouteImport.update({
-    id: '/chapters',
-    path: '/chapters',
+const AuthenticatedUniverseIdContinuityRoute =
+  AuthenticatedUniverseIdContinuityRouteImport.update({
+    id: '/continuity',
+    path: '/continuity',
+    getParentRoute: () => AuthenticatedUniverseIdRoute,
+  } as any)
+const AuthenticatedUniverseIdDnaRoute =
+  AuthenticatedUniverseIdDnaRouteImport.update({
+    id: '/dna',
+    path: '/dna',
+    getParentRoute: () => AuthenticatedUniverseIdRoute,
+  } as any)
+const AuthenticatedUniverseIdMemoryRoute =
+  AuthenticatedUniverseIdMemoryRouteImport.update({
+    id: '/memory',
+    path: '/memory',
+    getParentRoute: () => AuthenticatedUniverseIdRoute,
+  } as any)
+const AuthenticatedUniverseIdTimelineRoute =
+  AuthenticatedUniverseIdTimelineRouteImport.update({
+    id: '/timeline',
+    path: '/timeline',
+    getParentRoute: () => AuthenticatedUniverseIdRoute,
+  } as any)
+const AuthenticatedUniverseIdVersionsRoute =
+  AuthenticatedUniverseIdVersionsRouteImport.update({
+    id: '/versions',
+    path: '/versions',
+    getParentRoute: () => AuthenticatedUniverseIdRoute,
+  } as any)
+const AuthenticatedUniverseIdWorldRoute =
+  AuthenticatedUniverseIdWorldRouteImport.update({
+    id: '/world',
+    path: '/world',
     getParentRoute: () => AuthenticatedUniverseIdRoute,
   } as any)
 
@@ -113,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/universe/$id/characters': typeof AuthenticatedUniverseIdCharactersRoute
   '/universe/$id/continuity': typeof AuthenticatedUniverseIdContinuityRoute
   '/universe/$id/dna': typeof AuthenticatedUniverseIdDnaRoute
+  '/universe/$id/memory': typeof AuthenticatedUniverseIdMemoryRoute
   '/universe/$id/timeline': typeof AuthenticatedUniverseIdTimelineRoute
   '/universe/$id/versions': typeof AuthenticatedUniverseIdVersionsRoute
   '/universe/$id/world': typeof AuthenticatedUniverseIdWorldRoute
@@ -127,6 +135,7 @@ export interface FileRoutesByTo {
   '/universe/$id/characters': typeof AuthenticatedUniverseIdCharactersRoute
   '/universe/$id/continuity': typeof AuthenticatedUniverseIdContinuityRoute
   '/universe/$id/dna': typeof AuthenticatedUniverseIdDnaRoute
+  '/universe/$id/memory': typeof AuthenticatedUniverseIdMemoryRoute
   '/universe/$id/timeline': typeof AuthenticatedUniverseIdTimelineRoute
   '/universe/$id/versions': typeof AuthenticatedUniverseIdVersionsRoute
   '/universe/$id/world': typeof AuthenticatedUniverseIdWorldRoute
@@ -144,6 +153,7 @@ export interface FileRoutesById {
   '/_authenticated/universe/$id/characters': typeof AuthenticatedUniverseIdCharactersRoute
   '/_authenticated/universe/$id/continuity': typeof AuthenticatedUniverseIdContinuityRoute
   '/_authenticated/universe/$id/dna': typeof AuthenticatedUniverseIdDnaRoute
+  '/_authenticated/universe/$id/memory': typeof AuthenticatedUniverseIdMemoryRoute
   '/_authenticated/universe/$id/timeline': typeof AuthenticatedUniverseIdTimelineRoute
   '/_authenticated/universe/$id/versions': typeof AuthenticatedUniverseIdVersionsRoute
   '/_authenticated/universe/$id/world': typeof AuthenticatedUniverseIdWorldRoute
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/universe/$id/characters'
     | '/universe/$id/continuity'
     | '/universe/$id/dna'
+    | '/universe/$id/memory'
     | '/universe/$id/timeline'
     | '/universe/$id/versions'
     | '/universe/$id/world'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/universe/$id/characters'
     | '/universe/$id/continuity'
     | '/universe/$id/dna'
+    | '/universe/$id/memory'
     | '/universe/$id/timeline'
     | '/universe/$id/versions'
     | '/universe/$id/world'
@@ -191,6 +203,7 @@ export interface FileRouteTypes {
     | '/_authenticated/universe/$id/characters'
     | '/_authenticated/universe/$id/continuity'
     | '/_authenticated/universe/$id/dna'
+    | '/_authenticated/universe/$id/memory'
     | '/_authenticated/universe/$id/timeline'
     | '/_authenticated/universe/$id/versions'
     | '/_authenticated/universe/$id/world'
@@ -205,11 +218,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -219,25 +232,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/new-universe': {
-      id: '/_authenticated/new-universe'
-      path: '/new-universe'
-      fullPath: '/new-universe'
-      preLoaderRoute: typeof AuthenticatedNewUniverseRouteImport
-      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/new-universe': {
+      id: '/_authenticated/new-universe'
+      path: '/new-universe'
+      fullPath: '/new-universe'
+      preLoaderRoute: typeof AuthenticatedNewUniverseRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/universe/$id': {
@@ -254,39 +267,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUniverseIdIndexRouteImport
       parentRoute: typeof AuthenticatedUniverseIdRoute
     }
-    '/_authenticated/universe/$id/world': {
-      id: '/_authenticated/universe/$id/world'
-      path: '/world'
-      fullPath: '/universe/$id/world'
-      preLoaderRoute: typeof AuthenticatedUniverseIdWorldRouteImport
-      parentRoute: typeof AuthenticatedUniverseIdRoute
-    }
-    '/_authenticated/universe/$id/versions': {
-      id: '/_authenticated/universe/$id/versions'
-      path: '/versions'
-      fullPath: '/universe/$id/versions'
-      preLoaderRoute: typeof AuthenticatedUniverseIdVersionsRouteImport
-      parentRoute: typeof AuthenticatedUniverseIdRoute
-    }
-    '/_authenticated/universe/$id/timeline': {
-      id: '/_authenticated/universe/$id/timeline'
-      path: '/timeline'
-      fullPath: '/universe/$id/timeline'
-      preLoaderRoute: typeof AuthenticatedUniverseIdTimelineRouteImport
-      parentRoute: typeof AuthenticatedUniverseIdRoute
-    }
-    '/_authenticated/universe/$id/dna': {
-      id: '/_authenticated/universe/$id/dna'
-      path: '/dna'
-      fullPath: '/universe/$id/dna'
-      preLoaderRoute: typeof AuthenticatedUniverseIdDnaRouteImport
-      parentRoute: typeof AuthenticatedUniverseIdRoute
-    }
-    '/_authenticated/universe/$id/continuity': {
-      id: '/_authenticated/universe/$id/continuity'
-      path: '/continuity'
-      fullPath: '/universe/$id/continuity'
-      preLoaderRoute: typeof AuthenticatedUniverseIdContinuityRouteImport
+    '/_authenticated/universe/$id/chapters': {
+      id: '/_authenticated/universe/$id/chapters'
+      path: '/chapters'
+      fullPath: '/universe/$id/chapters'
+      preLoaderRoute: typeof AuthenticatedUniverseIdChaptersRouteImport
       parentRoute: typeof AuthenticatedUniverseIdRoute
     }
     '/_authenticated/universe/$id/characters': {
@@ -296,11 +281,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUniverseIdCharactersRouteImport
       parentRoute: typeof AuthenticatedUniverseIdRoute
     }
-    '/_authenticated/universe/$id/chapters': {
-      id: '/_authenticated/universe/$id/chapters'
-      path: '/chapters'
-      fullPath: '/universe/$id/chapters'
-      preLoaderRoute: typeof AuthenticatedUniverseIdChaptersRouteImport
+    '/_authenticated/universe/$id/continuity': {
+      id: '/_authenticated/universe/$id/continuity'
+      path: '/continuity'
+      fullPath: '/universe/$id/continuity'
+      preLoaderRoute: typeof AuthenticatedUniverseIdContinuityRouteImport
+      parentRoute: typeof AuthenticatedUniverseIdRoute
+    }
+    '/_authenticated/universe/$id/dna': {
+      id: '/_authenticated/universe/$id/dna'
+      path: '/dna'
+      fullPath: '/universe/$id/dna'
+      preLoaderRoute: typeof AuthenticatedUniverseIdDnaRouteImport
+      parentRoute: typeof AuthenticatedUniverseIdRoute
+    }
+    '/_authenticated/universe/$id/memory': {
+      id: '/_authenticated/universe/$id/memory'
+      path: '/memory'
+      fullPath: '/universe/$id/memory'
+      preLoaderRoute: typeof AuthenticatedUniverseIdMemoryRouteImport
+      parentRoute: typeof AuthenticatedUniverseIdRoute
+    }
+    '/_authenticated/universe/$id/timeline': {
+      id: '/_authenticated/universe/$id/timeline'
+      path: '/timeline'
+      fullPath: '/universe/$id/timeline'
+      preLoaderRoute: typeof AuthenticatedUniverseIdTimelineRouteImport
+      parentRoute: typeof AuthenticatedUniverseIdRoute
+    }
+    '/_authenticated/universe/$id/versions': {
+      id: '/_authenticated/universe/$id/versions'
+      path: '/versions'
+      fullPath: '/universe/$id/versions'
+      preLoaderRoute: typeof AuthenticatedUniverseIdVersionsRouteImport
+      parentRoute: typeof AuthenticatedUniverseIdRoute
+    }
+    '/_authenticated/universe/$id/world': {
+      id: '/_authenticated/universe/$id/world'
+      path: '/world'
+      fullPath: '/universe/$id/world'
+      preLoaderRoute: typeof AuthenticatedUniverseIdWorldRouteImport
       parentRoute: typeof AuthenticatedUniverseIdRoute
     }
   }
@@ -311,6 +331,7 @@ interface AuthenticatedUniverseIdRouteChildren {
   AuthenticatedUniverseIdCharactersRoute: typeof AuthenticatedUniverseIdCharactersRoute
   AuthenticatedUniverseIdContinuityRoute: typeof AuthenticatedUniverseIdContinuityRoute
   AuthenticatedUniverseIdDnaRoute: typeof AuthenticatedUniverseIdDnaRoute
+  AuthenticatedUniverseIdMemoryRoute: typeof AuthenticatedUniverseIdMemoryRoute
   AuthenticatedUniverseIdTimelineRoute: typeof AuthenticatedUniverseIdTimelineRoute
   AuthenticatedUniverseIdVersionsRoute: typeof AuthenticatedUniverseIdVersionsRoute
   AuthenticatedUniverseIdWorldRoute: typeof AuthenticatedUniverseIdWorldRoute
@@ -325,6 +346,7 @@ const AuthenticatedUniverseIdRouteChildren: AuthenticatedUniverseIdRouteChildren
     AuthenticatedUniverseIdContinuityRoute:
       AuthenticatedUniverseIdContinuityRoute,
     AuthenticatedUniverseIdDnaRoute: AuthenticatedUniverseIdDnaRoute,
+    AuthenticatedUniverseIdMemoryRoute: AuthenticatedUniverseIdMemoryRoute,
     AuthenticatedUniverseIdTimelineRoute: AuthenticatedUniverseIdTimelineRoute,
     AuthenticatedUniverseIdVersionsRoute: AuthenticatedUniverseIdVersionsRoute,
     AuthenticatedUniverseIdWorldRoute: AuthenticatedUniverseIdWorldRoute,

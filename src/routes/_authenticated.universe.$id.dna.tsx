@@ -1,4 +1,4 @@
-import { createFileRoute, useParams } from "@tanstack/react-router";
+import { createFileRoute, useParams, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { listEntities, upsertEntity, deleteEntity } from "@/lib/queries";
@@ -77,6 +77,9 @@ function StoryDNA() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Link to="/universe/$id/chapters" params={{ id }}>
+            <Button variant="outline">Continue writing</Button>
+          </Link>
           <StoryDevelopmentDialog projectId={id} />
           <GenerateStoryDnaDialog projectId={id} />
         </div>

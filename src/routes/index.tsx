@@ -26,21 +26,28 @@ function Landing() {
             <span className="font-serif text-[22px] tracking-[0.04em]">ONESHOT</span>
           </Link>
           <nav className="hidden items-center gap-2 md:flex">
-            {["Story DNA", "Writers' Room", "Continuity", "Pricing"].map((n) => (
-              <a key={n} href="#pillars" className="rounded-full px-3 py-2 text-[15px] font-medium hover:bg-[color:var(--pumice)]">
+            {["Story foundation", "Writing room", "Continuity", "Story Memory"].map((n) => (
+              <a
+                key={n}
+                href="#pillars"
+                className="rounded-full px-3 py-2 text-[15px] font-medium hover:bg-[color:var(--pumice)]"
+              >
                 {n}
               </a>
             ))}
           </nav>
           <div className="flex items-center gap-2">
-            <Link to="/auth" className="hidden rounded-full px-4 py-2 text-[15px] font-medium hover:bg-[color:var(--pumice)] sm:inline-block">
+            <Link
+              to="/auth"
+              className="hidden rounded-full px-4 py-2 text-[15px] font-medium hover:bg-[color:var(--pumice)] sm:inline-block"
+            >
               Sign in
             </Link>
             <Link
               to="/auth"
               className="inline-flex items-center gap-2 rounded-full bg-[color:var(--ember)] px-5 py-2.5 text-[15px] font-medium text-[color:var(--obsidian)] hover:brightness-95"
             >
-              Start a universe <ArrowRight className="h-4 w-4" />
+              Start writing <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -54,10 +61,13 @@ function Landing() {
             CONTINUITY-FIRST AI STORYTELLING
           </div>
           <h1 className="font-serif text-[clamp(64px,12vw,180px)] leading-[0.94] tracking-[0.02em]">
-            One idea.<br />Every universe.
+            Build stories
+            <br />
+            that remember.
           </h1>
           <p className="mt-8 max-w-xl text-[16px] leading-[1.55] text-[color:var(--obsidian)]/80">
-            OneShot turns a single spark into living Story DNA — canon, characters, world rules, timelines, and chapters with a continuity engine that catches contradictions before your readers do.
+            Turn one idea into a living story universe that stays organized, consistent, and ready
+            to grow.
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
             <Link
@@ -70,7 +80,7 @@ function Landing() {
               href="#pillars"
               className="inline-flex items-center gap-2 rounded-[40px] border-[1.5px] border-[color:var(--obsidian)] px-6 py-3 text-[16px] font-medium hover:bg-[color:var(--limestone)]"
             >
-              See the pillars
+              See how it works
             </a>
           </div>
         </div>
@@ -79,45 +89,74 @@ function Landing() {
         <div className="halftone-hero relative aspect-[4/5] w-full rounded-[40px] overflow-hidden">
           <div className="absolute inset-x-0 bottom-0 p-8">
             <div className="font-serif text-[color:var(--chalk)] text-[clamp(40px,6vw,72px)] leading-[0.94] tracking-[0.02em]">
-              STORY<br/>DNA<br/>ENGINE
+              STORY
+              <br />
+              DNA
+              <br />
+              ENGINE
             </div>
           </div>
         </div>
       </section>
 
-      {/* Ember stats */}
-      <section className="mx-auto max-w-[1280px] px-6 pb-20 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { k: "12M+", l: "Canon facts tracked" },
-          { k: "98%", l: "Continuity accuracy" },
-          { k: "40k", l: "Chapters drafted" },
-          { k: "3.2×", l: "Faster to first draft" },
-        ].map((s) => (
-          <div key={s.l} className="rounded-[40px] bg-[color:var(--ember)] p-10 text-[color:var(--chalk)]">
-            <div className="font-serif text-[80px] leading-[0.94] tracking-[0.02em]">{s.k}</div>
-            <div className="mt-2 text-[14px] font-medium uppercase tracking-wide">{s.l}</div>
+      <section className="mx-auto max-w-[1280px] px-6 pb-20">
+        <div className="rounded-[40px] bg-[color:var(--limestone)] p-8 md:p-12">
+          <div className="max-w-2xl">
+            <div className="text-xs font-medium uppercase tracking-[0.2em] text-[color:var(--obsidian)]/60">
+              A quieter way to write
+            </div>
+            <p className="mt-4 font-serif text-[clamp(32px,5vw,64px)] leading-none">
+              Your characters, rules, chapters, and questions—held in one living place.
+            </p>
           </div>
-        ))}
+        </div>
       </section>
 
       {/* Pillars */}
       <section id="pillars" className="mx-auto max-w-[1280px] px-6 pb-24">
         <div className="mb-10 flex items-end justify-between gap-6">
           <h2 className="font-serif text-[clamp(48px,8vw,96px)] leading-[0.94] tracking-[0.02em]">
-            Every pillar.<br/>One canon.
+            Every pillar.
+            <br />
+            One canon.
           </h2>
           <p className="hidden max-w-sm text-[16px] leading-[1.55] text-[color:var(--obsidian)]/70 md:block">
-            A writers' room, a development studio, and a continuity guardrail — folded into one workspace.
+            A writers' room, a development studio, and a continuity guardrail — folded into one
+            workspace.
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[
-            { icon: GitBranch, t: "Story DNA", d: "Canon facts with proposed and approved states across every entity." },
-            { icon: Users, t: "Characters in voice", d: "Goals, fears, arcs, and relationships kept inside continuity." },
-            { icon: Clock, t: "Cinematic timelines", d: "Primary and alternate timelines you can branch and compare." },
-            { icon: BookOpen, t: "Chapter workspace", d: "Distraction-free writing with autosave and inline AI assist." },
-            { icon: ShieldCheck, t: "Continuity center", d: "Cited evidence, conflicting canon, one-click resolutions." },
-            { icon: Sparkles, t: "Versions & revisions", d: "Compare, restore, and travel any past state of your story." },
+            {
+              icon: GitBranch,
+              t: "Story DNA",
+              d: "Canon facts with proposed and approved states across every entity.",
+            },
+            {
+              icon: Users,
+              t: "Characters in voice",
+              d: "Goals, fears, arcs, and relationships kept inside continuity.",
+            },
+            {
+              icon: Clock,
+              t: "Story memory",
+              d: "Ask why a relationship exists or where a promise began, with evidence from your story.",
+            },
+            {
+              icon: BookOpen,
+              t: "Chapter workspace",
+              d: "Distraction-free writing with autosave and inline AI assist.",
+            },
+            {
+              icon: ShieldCheck,
+              t: "Continuity center",
+              d: "Cited evidence, conflicting canon, one-click resolutions.",
+            },
+            {
+              icon: Sparkles,
+              t: "Story consistency",
+              d: "Review possible contradictions with calm, traceable evidence before they become continuity problems.",
+            },
           ].map(({ icon: I, t, d }) => (
             <div key={t} className="rounded-[40px] bg-[color:var(--limestone)] p-10">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[color:var(--obsidian)] text-[color:var(--ember)]">
@@ -135,7 +174,9 @@ function Landing() {
         <div className="rounded-[40px] bg-[color:var(--obsidian)] p-10 text-[color:var(--chalk)] md:p-16">
           <div className="grid gap-8 md:grid-cols-[1.4fr_1fr] md:items-end">
             <h3 className="font-serif text-[clamp(40px,7vw,80px)] leading-[0.94] tracking-[0.02em]">
-              From spark to<br/>shipped canon.
+              From spark to
+              <br />
+              shipped canon.
             </h3>
             <Link
               to="/auth"

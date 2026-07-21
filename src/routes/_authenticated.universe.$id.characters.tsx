@@ -1,4 +1,5 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { listEntities, listRelationships } from "@/lib/queries";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CanonPill } from "./_authenticated.universe.$id.dna";
-import { Target, Ghost, Mic, Route as RouteIcon, Link2 } from "lucide-react";
+import { Target, Ghost, Mic, Route as RouteIcon, Link2, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/_authenticated/universe/$id/characters")({
   component: Characters,
@@ -17,6 +19,10 @@ function Characters() {
   const q = useQuery({ queryKey: ["entities", id], queryFn: () => listEntities(id) });
   const rels = useQuery({ queryKey: ["relationships", id], queryFn: () => listRelationships(id) });
   const chars = (q.data ?? []).filter((e) => e.entity_type === "character");
+  const [search, setSearch] = useState("");
+  const visible = chars.filter((character) =>
+    `${character.name} ${character.summary ?? ""}`.toLowerCase().includes(search.toLowerCase()),
+  );
 
   if (q.isLoading)
     return (
@@ -41,58 +47,81 @@ function Characters() {
     );
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {chars.map((c) => {
-        const attrs = (c.attributes ?? {}) as any;
-        const cRels = (rels.data ?? []).filter(
-          (r) => r.source_entity_id === c.id || r.target_entity_id === c.id,
-        );
-        return (
-          <Card key={c.id} className="border-border/60 bg-card/60">
-            <CardContent className="p-5 space-y-4">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10 border border-border/60">
-                    <AvatarFallback className="bg-secondary text-secondary-foreground">
-                      {c.name.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-serif text-lg leading-tight">{c.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {attrs.role ?? "Cast member"}
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-serif text-3xl">Characters</h1>
+          <p className="mt-1 text-sm text-muted-foreground">The people who make this story move.</p>
+        </div>
+        <div className="relative w-64">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search characters…"
+            className="pl-9"
+            aria-label="Search characters"
+          />
+        </div>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {visible.map((c) => {
+          const attrs = (c.attributes ?? {}) as any;
+          const cRels = (rels.data ?? []).filter(
+            (r) => r.source_entity_id === c.id || r.target_entity_id === c.id,
+          );
+          return (
+            <Card key={c.id} className="border-border/60 bg-card/60">
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10 border border-border/60">
+                      <AvatarFallback className="bg-secondary text-secondary-foreground">
+                        {c.name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-serif text-lg leading-tight">{c.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {attrs.role ?? "Cast member"}
+                      </div>
                     </div>
                   </div>
+                  <CanonPill status={c.canon_status} />
                 </div>
-                <CanonPill status={c.canon_status} />
-              </div>
-              <p className="text-sm text-muted-foreground line-clamp-3">
-                {c.summary ?? "No summary."}
-              </p>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <Trait icon={Target} label="Goal" value={attrs.goal ?? "—"} />
-                <Trait icon={Ghost} label="Fear" value={attrs.fear ?? "—"} />
-                <Trait icon={Mic} label="Voice" value={attrs.voice ?? "—"} />
-                <Trait icon={RouteIcon} label="Arc" value={attrs.arc ?? "—"} />
-              </div>
-              {cRels.length > 0 && (
-                <div className="pt-2 border-t border-border/60">
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                    <Link2 className="h-3 w-3" /> Relationships
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {cRels.slice(0, 4).map((r) => (
-                      <Badge key={r.id} variant="outline" className="text-[10px]">
-                        {r.relationship_type}
-                      </Badge>
-                    ))}
-                  </div>
+                <p className="text-sm text-muted-foreground line-clamp-3">
+                  {c.summary ?? "No summary."}
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <Trait icon={Target} label="Goal" value={attrs.goal ?? "—"} />
+                  <Trait icon={Ghost} label="Fear" value={attrs.fear ?? "—"} />
+                  <Trait icon={Mic} label="Voice" value={attrs.voice ?? "—"} />
+                  <Trait icon={RouteIcon} label="Arc" value={attrs.arc ?? "—"} />
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        );
-      })}
+                {cRels.length > 0 && (
+                  <div className="pt-2 border-t border-border/60">
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                      <Link2 className="h-3 w-3" /> Relationships
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {cRels.slice(0, 4).map((r) => (
+                        <Badge key={r.id} variant="outline" className="text-[10px]">
+                          {r.relationship_type}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+      {visible.length === 0 && (
+        <div className="rounded-xl border border-dashed border-border/60 p-8 text-center text-sm text-muted-foreground">
+          No characters match that search.
+        </div>
+      )}
     </div>
   );
 }

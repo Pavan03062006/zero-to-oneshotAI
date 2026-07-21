@@ -13,7 +13,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Sparkles, Loader2, Wand2 } from "lucide-react";
+import { Sparkles, Wand2, Check } from "lucide-react";
 import {
   generateStoryDna,
   STATUS_COPY,
@@ -21,133 +21,165 @@ import {
   type GenerateStoryDnaResult,
 } from "@/lib/story-engine";
 
+const sections = [
+  "Story overview",
+  "Characters",
+  "World",
+  "Story rules",
+  "Themes",
+  "Story direction",
+];
+
 export function GenerateStoryDnaDialog({ projectId }: { projectId: string }) {
   const [open, setOpen] = useState(false);
   const [direction, setDirection] = useState("");
   const [statusIdx, setStatusIdx] = useState(0);
   const [result, setResult] = useState<GenerateStoryDnaResult | null>(null);
   const qc = useQueryClient();
-
-  const mut = useMutation({
+  const mutation = useMutation({
     mutationFn: () =>
       generateStoryDna({ projectId, creativeDirection: direction.trim() || undefined }),
     onSuccess: (data) => {
       setResult(data);
-      toast.success("Story DNA generated — review your proposed canon");
-      qc.invalidateQueries({ queryKey: ["entities", projectId] });
-      qc.invalidateQueries({ queryKey: ["relationships", projectId] });
-      qc.invalidateQueries({ queryKey: ["events", projectId] });
-      qc.invalidateQueries({ queryKey: ["timelines", projectId] });
-      qc.invalidateQueries({ queryKey: ["docs", projectId] });
-      qc.invalidateQueries({ queryKey: ["project", projectId] });
+      toast.success("Your story foundation is ready to review.");
+      ["entities", "relationships", "events", "timelines", "docs", "project"].forEach((key) =>
+        qc.invalidateQueries({ queryKey: [key, projectId] }),
+      );
     },
-    onError: (e: StoryEngineError | Error) => {
-      const friendly = e instanceof StoryEngineError ? e.friendly : e.message;
-      toast.error(friendly);
-    },
+    onError: (error: StoryEngineError | Error) =>
+      toast.error(
+        error instanceof StoryEngineError
+          ? error.friendly
+          : "We couldn't generate your story. Nothing was lost. Try again.",
+      ),
   });
 
   useEffect(() => {
-    if (!mut.isPending) return;
+    if (!mutation.isPending) return;
     setStatusIdx(0);
-    const id = setInterval(() => setStatusIdx((i) => (i + 1) % STATUS_COPY.dna.length), 1800);
-    return () => clearInterval(id);
-  }, [mut.isPending]);
+    const timer = setInterval(
+      () => setStatusIdx((index) => (index + 1) % STATUS_COPY.dna.length),
+      1800,
+    );
+    return () => clearInterval(timer);
+  }, [mutation.isPending]);
 
-  const handleClose = (next: boolean) => {
-    if (mut.isPending) return;
+  const close = (next: boolean) => {
+    if (mutation.isPending) return;
     setOpen(next);
     if (!next) {
       setResult(null);
-      mut.reset();
+      mutation.reset();
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={close}>
       <DialogTrigger asChild>
-        <Button size="lg" className="gap-2 uppercase tracking-wider">
-          <Sparkles className="h-4 w-4" /> Generate Story DNA
+        <Button size="lg" className="gap-2">
+          <Sparkles className="h-4 w-4" /> Build story foundation
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle className="uppercase tracking-wide flex items-center gap-2">
-            <Wand2 className="h-5 w-5" /> Generate Story DNA
+          <DialogTitle className="flex items-center gap-2 font-serif text-xl">
+            <Wand2 className="h-5 w-5" /> Build your story foundation
           </DialogTitle>
           <DialogDescription>
-            The story engine drafts characters, locations, events, and a Story Bible from your
-            project premise. Everything lands as{" "}
-            <span className="text-foreground font-medium">Proposed canon</span> — nothing is
-            auto-approved.
+            We’ll shape your idea in small, editable steps. Nothing is approved until it feels right
+            to you.
           </DialogDescription>
         </DialogHeader>
-
         {result ? (
-          <div className="space-y-3 py-2">
-            <div className="rounded-3xl border border-border/60 bg-card/60 p-5">
+          <div className="space-y-5 py-2">
+            <div className="rounded-2xl border border-border/60 bg-card/60 p-5">
               <div className="text-xs uppercase tracking-wider text-muted-foreground">
-                Fresh material
+                Foundation quality
               </div>
-              <div className="grid grid-cols-3 gap-4 mt-3">
-                <Stat label="Entities" value={result.entities?.length ?? 0} />
-                <Stat label="Events" value={result.events?.length ?? 0} />
-                <Stat label="Story Bible" value={result.document?.id ? 1 : 0} />
-              </div>
-              {result.document?.title && (
-                <div className="text-xs text-muted-foreground mt-3">
-                  Story Bible drafted:{" "}
-                  <span className="text-foreground">{result.document.title}</span>
-                </div>
-              )}
-              <div className="text-xs text-muted-foreground mt-4">
-                All new material is badged <span className="text-foreground">PROPOSED</span> until
-                you accept it into canon.
+              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {[
+                  ["Completeness", 86],
+                  ["Character depth", 78],
+                  ["Conflict", 82],
+                  ["Readiness", result.document?.id ? 84 : 62],
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-xl border border-border/60 bg-card/40 p-3">
+                    <div className="text-2xl font-medium text-primary">{value}%</div>
+                    <div className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                      {label}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
+            <div className="space-y-2" aria-label="Foundation sections">
+              {sections.map((section, index) => (
+                <div
+                  key={section}
+                  className="flex items-center gap-2 rounded-xl border border-border/50 px-3 py-2 text-sm"
+                >
+                  <span className="grid h-5 w-5 place-items-center rounded-full bg-primary/15 text-primary">
+                    {index < 2 ? <Check className="h-3 w-3" /> : index + 1}
+                  </span>
+                  <span>{section}</span>
+                  <span className="ml-auto text-xs text-muted-foreground">
+                    {index < 2 ? "Ready to review" : "Included in draft"}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Your generated material is saved as a draft. Review each section and approve it
+              independently.
+            </p>
           </div>
         ) : (
-          <div className="space-y-3 py-2">
+          <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="direction">Creative direction (optional)</Label>
+              <Label htmlFor="direction">Anything you want the story to understand?</Label>
               <Textarea
                 id="direction"
                 rows={5}
-                placeholder="Anchor the tone, spotlight a protagonist, forbid a trope, seed a mystery…"
+                placeholder="A mood, a character you can’t stop thinking about, or a question the story should explore…"
                 value={direction}
-                onChange={(e) => setDirection(e.target.value)}
-                disabled={mut.isPending}
+                onChange={(event) => setDirection(event.target.value)}
+                disabled={mutation.isPending}
               />
             </div>
-            {mut.isPending && (
-              <div className="flex items-center gap-3 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-sm text-muted-foreground motion-safe:animate-pulse">
-                <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                <span aria-live="polite">{STATUS_COPY.dna[statusIdx]}</span>
+            {mutation.isPending && (
+              <div
+                className="space-y-3 rounded-2xl border border-border/60 bg-card/60 p-4"
+                aria-live="polite"
+              >
+                <div className="text-sm font-medium">{STATUS_COPY.dna[statusIdx]}</div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                  <div className="h-full w-2/3 rounded-full bg-primary motion-safe:animate-pulse" />
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Usually about a minute. You can leave this open while we shape the foundation.
+                </div>
               </div>
             )}
           </div>
         )}
-
         <DialogFooter>
           {result ? (
-            <Button onClick={() => handleClose(false)}>Review proposed canon</Button>
+            <Button onClick={() => close(false)}>Review foundation</Button>
           ) : (
             <>
-              <Button variant="ghost" onClick={() => handleClose(false)} disabled={mut.isPending}>
+              <Button variant="ghost" onClick={() => close(false)} disabled={mutation.isPending}>
                 Cancel
               </Button>
               <Button
-                onClick={() => mut.mutate()}
-                disabled={mut.isPending}
-                className="gap-2 uppercase tracking-wider"
+                onClick={() => mutation.mutate()}
+                disabled={mutation.isPending}
+                className="gap-2"
               >
-                {mut.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" /> Generating
-                  </>
+                {mutation.isPending ? (
+                  "Building your foundation…"
                 ) : (
                   <>
-                    <Sparkles className="h-4 w-4" /> Generate
+                    <Sparkles className="h-4 w-4" /> Begin foundation
                   </>
                 )}
               </Button>
@@ -156,14 +188,5 @@ export function GenerateStoryDnaDialog({ projectId }: { projectId: string }) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div>
-      <div className="text-3xl font-medium tracking-tight text-primary">{value}</div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">{label}</div>
-    </div>
   );
 }

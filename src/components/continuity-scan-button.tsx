@@ -41,9 +41,7 @@ export function ContinuityScanButton({
     onSuccess: (data) => {
       const n = data.issues?.length ?? 0;
       if (n === 0)
-        toast.success(
-          `Canon intact — no issues found${typeof data.score === "number" ? ` (score ${data.score}/100)` : ""}`,
-        );
+        toast.success("No continuity problems found in the available story information.");
       else toast.message(`Continuity scan complete — ${n} issue${n === 1 ? "" : "s"} logged`);
       qc.invalidateQueries({ queryKey: ["issues", projectId] });
       onComplete?.(data);
@@ -74,7 +72,7 @@ export function ContinuityScanButton({
       >
         {mut.isPending ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin" /> Scanning
+            <Loader2 className="h-4 w-4 animate-spin" /> Checking story consistency
           </>
         ) : (
           <>
@@ -98,13 +96,15 @@ export function ContinuityScanSuccess({ score, summary }: { score?: number; summ
   return (
     <div className="rounded-3xl border border-primary/30 bg-primary/5 p-6 text-center">
       <ShieldCheck className="h-6 w-6 mx-auto text-primary" />
-      <div className="text-lg font-medium mt-2">Canon holds</div>
-      {typeof score === "number" && (
-        <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">
-          Continuity score {score}/100
-        </div>
-      )}
+      <div className="text-lg font-medium mt-2">No continuity problems found</div>
+      <div className="text-xs text-muted-foreground mt-1">
+        This chapter is consistent with the approved story information currently available.
+      </div>
       {summary && <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">{summary}</p>}
+      <p className="text-xs text-muted-foreground mt-3 max-w-md mx-auto">
+        ONESHOT checks saved Story Bible facts and approved chapter context; it cannot infer every
+        implication in a story.
+      </p>
     </div>
   );
 }

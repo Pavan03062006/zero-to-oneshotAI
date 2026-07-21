@@ -1,0 +1,16 @@
+begin;
+select plan(12);
+select has_table('public','projects','projects exists');
+select has_table('public','project_members','members exists');
+select has_table('public','continuity_scans','scans exist');
+select has_table('public','generation_jobs','jobs exist');
+select has_function('public','bootstrap_project',array['text','text','text','text','project_format','text','text','canon_strictness','text'],'atomic bootstrap exists');
+select has_function('public','save_document_revision',array['uuid','text','text','revision_source'],'revision RPC exists');
+select col_is_pk('public','projects','id','project id is primary key');
+select col_is_fk('public','project_members','project_id','member project is foreign key');
+select has_index('public','timelines','timelines_one_primary_per_project','one-primary partial index exists');
+select policies_are('public','projects',array['projects_read','projects_update','projects_delete'],'explicit project policies');
+select policies_are('public','generation_outputs',array['outputs_read'],'outputs are browser read-only');
+select policies_are('public','ai_usage_logs',array['usage_read'],'usage logs are browser read-only');
+select * from finish();
+rollback;

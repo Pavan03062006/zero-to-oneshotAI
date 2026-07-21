@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/new-universe")({
   component: NewUniverse,
 });
 
-const STEPS = ["Spark", "Signature", "Craft", "Review"] as const;
+const STEPS = ["The idea", "Details", "The feeling", "Review"] as const;
 
 function NewUniverse() {
   const [step, setStep] = useState(0);
@@ -42,6 +42,12 @@ function NewUniverse() {
         title: title || "Untitled universe",
         genre,
         premise: premise || logline || null,
+        logline,
+        format: "novel",
+        tone,
+        point_of_view: pov,
+        canon_strictness:
+          ambition[0] >= 80 ? "strict" : ambition[0] >= 40 ? "balanced" : "flexible",
       }),
     onSuccess: (p) => {
       qc.invalidateQueries({ queryKey: ["projects"] });
@@ -54,9 +60,14 @@ function NewUniverse() {
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12">
       <div className="mb-8">
-        <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">New universe</div>
-        <h1 className="font-serif text-3xl md:text-4xl mt-2 tracking-tight">Seed your Story DNA</h1>
-        <div className="mt-6 flex items-center gap-2">
+        <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">New story</div>
+        <h1 className="font-serif text-3xl md:text-4xl mt-2 tracking-tight">
+          Let’s make something worth reading.
+        </h1>
+        <div
+          className="mt-6 flex items-center gap-2"
+          aria-label={`Step ${step + 1} of ${STEPS.length}`}
+        >
           {STEPS.map((s, i) => (
             <div key={s} className="flex items-center gap-2">
               <div
@@ -66,6 +77,7 @@ function NewUniverse() {
               </div>
               <span
                 className={`text-xs ${i === step ? "text-foreground" : "text-muted-foreground"}`}
+                aria-current={i === step ? "step" : undefined}
               >
                 {s}
               </span>
@@ -77,134 +89,135 @@ function NewUniverse() {
 
       <Card className="border-border/60 bg-card/60 shadow-elegant">
         <CardContent className="p-6 md:p-8 space-y-6">
-          {step === 0 && (
-            <div className="space-y-3">
-              <Label>What's the spark?</Label>
-              <Textarea
-                rows={7}
-                placeholder="A lighthouse keeper on a dying moon receives a message from herself, twenty years late…"
-                value={premise}
-                onChange={(e) => setPremise(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                One paragraph is enough. The studio will extract characters, world rules, and
-                threads into Story DNA.
-              </p>
-            </div>
-          )}
-          {step === 1 && (
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2 md:col-span-2">
-                <Label>Working title</Label>
-                <Input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="The Last Lantern"
+          <div aria-live="polite" key={step} className="space-y-6">
+            {step === 0 && (
+              <div className="space-y-3">
+                <Label>What’s the story?</Label>
+                <Textarea
+                  rows={7}
+                  placeholder="A lighthouse keeper on a dying moon receives a message from herself, twenty years late…"
+                  value={premise}
+                  onChange={(e) => setPremise(e.target.value)}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>Genre</Label>
-                <Select value={genre} onValueChange={setGenre}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[
-                      "Literary sci-fi",
-                      "Epic fantasy",
-                      "Noir",
-                      "Cozy mystery",
-                      "Horror",
-                      "Historical",
-                      "Contemporary",
-                      "Cyberpunk",
-                    ].map((g) => (
-                      <SelectItem key={g} value={g}>
-                        {g}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Tone</Label>
-                <Select value={tone} onValueChange={setTone}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[
-                      "Melancholic",
-                      "Hopeful",
-                      "Wry",
-                      "Menacing",
-                      "Elegiac",
-                      "Whimsical",
-                      "Tense",
-                    ].map((t) => (
-                      <SelectItem key={t} value={t}>
-                        {t}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label>Logline (optional)</Label>
-                <Input
-                  value={logline}
-                  onChange={(e) => setLogline(e.target.value)}
-                  placeholder="One sentence that captures the promise of the story."
-                />
-              </div>
-            </div>
-          )}
-          {step === 2 && (
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label>Point of view</Label>
-                <Select value={pov} onValueChange={setPov}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[
-                      "First person",
-                      "Third limited",
-                      "Third omniscient",
-                      "Braided POVs",
-                      "Epistolary",
-                    ].map((p) => (
-                      <SelectItem key={p} value={p}>
-                        {p}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Canon strictness — {ambition[0]}%</Label>
-                <Slider value={ambition} onValueChange={setAmbition} min={0} max={100} step={5} />
                 <p className="text-xs text-muted-foreground">
-                  Higher strictness means the continuity engine flags smaller drifts.
+                  A sentence or a whole paragraph is perfect. You can change everything later.
                 </p>
               </div>
-            </div>
-          )}
-          {step === 3 && (
-            <div className="space-y-4">
-              <ReviewRow label="Title" value={title || "Untitled universe"} />
-              <ReviewRow label="Genre / Tone" value={`${genre} · ${tone}`} />
-              <ReviewRow label="POV" value={pov} />
-              <ReviewRow label="Canon strictness" value={`${ambition[0]}%`} />
-              <div className="space-y-1">
-                <div className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Premise
+            )}
+            {step === 1 && (
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Title</Label>
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="The Last Lantern"
+                  />
                 </div>
-                <p className="text-sm text-foreground/90">{premise || "No premise yet."}</p>
+                <div className="space-y-2">
+                  <Label>Genre</Label>
+                  <Select value={genre} onValueChange={setGenre}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[
+                        "Literary sci-fi",
+                        "Epic fantasy",
+                        "Noir",
+                        "Cozy mystery",
+                        "Horror",
+                        "Historical",
+                        "Contemporary",
+                        "Cyberpunk",
+                      ].map((g) => (
+                        <SelectItem key={g} value={g}>
+                          {g}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Tone</Label>
+                  <Select value={tone} onValueChange={setTone}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[
+                        "Melancholic",
+                        "Hopeful",
+                        "Wry",
+                        "Menacing",
+                        "Elegiac",
+                        "Whimsical",
+                        "Tense",
+                      ].map((t) => (
+                        <SelectItem key={t} value={t}>
+                          {t}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Optional inspiration</Label>
+                  <Input
+                    value={logline}
+                    onChange={(e) => setLogline(e.target.value)}
+                    placeholder="One sentence that captures the promise of the story."
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
+            {step === 2 && (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label>How should it feel?</Label>
+                  <Select value={pov} onValueChange={setPov}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[
+                        "First person",
+                        "Third limited",
+                        "Third omniscient",
+                        "Braided POVs",
+                        "Epistolary",
+                      ].map((p) => (
+                        <SelectItem key={p} value={p}>
+                          {p}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Story rules — {ambition[0]}%</Label>
+                  <Slider value={ambition} onValueChange={setAmbition} min={0} max={100} step={5} />
+                  <p className="text-xs text-muted-foreground">
+                    Higher strictness means the continuity engine flags smaller drifts.
+                  </p>
+                </div>
+              </div>
+            )}
+            {step === 3 && (
+              <div className="space-y-4">
+                <ReviewRow label="Title" value={title || "Untitled universe"} />
+                <ReviewRow label="Genre / Tone" value={`${genre} · ${tone}`} />
+                <ReviewRow label="POV" value={pov} />
+                <ReviewRow label="Canon strictness" value={`${ambition[0]}%`} />
+                <div className="space-y-1">
+                  <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Premise
+                  </div>
+                  <p className="text-sm text-foreground/90">{premise || "No premise yet."}</p>
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="flex items-center justify-between pt-4">
             <Button variant="ghost" disabled={step === 0} onClick={() => setStep((s) => s - 1)}>
@@ -228,7 +241,8 @@ function NewUniverse() {
                 onClick={() => mut.mutate()}
                 className="gap-2 shadow-glow"
               >
-                <Sparkles className="h-4 w-4" /> {mut.isPending ? "Seeding…" : "Seed universe"}
+                <Sparkles className="h-4 w-4" />{" "}
+                {mut.isPending ? "Creating your story…" : "Create story"}
               </Button>
             )}
           </div>

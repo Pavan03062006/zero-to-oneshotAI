@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Database, Json } from "@/integrations/supabase/database.types";
 import type {
   Project,
   StoryEntity,
@@ -11,13 +12,55 @@ import type {
   DocumentType,
 } from "@/lib/types";
 
-// ---------- helpers ----------
+// ---------- generated-row mappers ----------
 
-type DocumentRow = Omit<Document, "content"> & { current_content: string | null };
+type Tables = Database["public"]["Tables"];
+type DbDocument = Tables["documents"]["Row"];
+type DbEntity = Tables["story_entities"]["Row"];
+type DbEvent = Tables["story_events"]["Row"];
+type DbIssue = Tables["consistency_issues"]["Row"];
 
-function mapDocument(row: DocumentRow): Document {
-  const { current_content, ...rest } = row;
-  return { ...rest, content: current_content ?? "" };
+function jsonObject(value: Json): Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function mapDocument(row: DbDocument): Document {
+  return {
+    id: row.id,
+    project_id: row.project_id,
+    title: row.title,
+    document_type: row.document_type,
+    position: row.order_index,
+    status: row.status === "archived" ? "draft" : row.status,
+    word_count: row.word_count,
+    content: row.current_content,
+    created_by: row.created_by,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
+function mapEntity(row: DbEntity): StoryEntity {
+  return { ...row, attributes: jsonObject(row.attributes) };
+}
+
+function mapEvent(row: DbEvent): StoryEvent {
+  return { ...row, sequence_order: Number(row.sequence_number) };
+}
+
+function mapIssue(row: DbIssue): ConsistencyIssue {
+  const evidence = Array.isArray(row.evidence)
+    ? row.evidence.flatMap((item) => {
+        if (item === null || typeof item !== "object" || Array.isArray(item)) return [];
+        const source = item.source,
+          quote = item.quote,
+          reason = item.reason;
+        return typeof source === "string" && typeof quote === "string" && typeof reason === "string"
+          ? [{ source, quote, reason }]
+          : [];
+      })
+    : [];
+  return { ...row, evidence };
 }
 
 function supabaseMessage(error: {
@@ -42,7 +85,7 @@ export async function updateProject(
     .select("*")
     .single();
   if (error) throw new Error(supabaseMessage(error));
-  return data as unknown as Project;
+  return data;
 }
 
 export async function listProjects(): Promise<Project[]> {
@@ -51,40 +94,39 @@ export async function listProjects(): Promise<Project[]> {
     .select("*")
     .order("updated_at", { ascending: false });
   if (error) throw new Error(supabaseMessage(error));
-  return (data ?? []) as unknown as Project[];
+  return data ?? [];
 }
 
 export async function getProject(id: string): Promise<Project | null> {
   const { data, error } = await supabase.from("projects").select("*").eq("id", id).maybeSingle();
   if (error) throw new Error(supabaseMessage(error));
-  return (data as unknown as Project) ?? null;
+  return data;
 }
 
 export async function createProject(input: {
   title: string;
   genre: string | null;
   premise: string | null;
+  logline?: string;
+  format?: Project["format"];
+  tone?: string | null;
+  point_of_view?: string | null;
+  canon_strictness?: Project["canon_strictness"];
   cover_style?: string | null;
 }): Promise<Project> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not signed in");
-  const { data, error } = await supabase
-    .from("projects")
-    .insert({
-      owner_id: user.id,
-      title: input.title,
-      premise: input.premise ?? "",
-      genre: input.genre,
-      status: "draft",
-      cover_style: input.cover_style ?? "violet",
-      progress: 0,
-    })
-    .select("*")
-    .single();
+  const { data, error } = await supabase.rpc("bootstrap_project", {
+    p_title: input.title,
+    p_premise: input.premise ?? "",
+    p_logline: input.logline ?? "",
+    ...(input.genre === null ? {} : { p_genre: input.genre }),
+    p_format: input.format ?? "novel",
+    ...(input.tone == null ? {} : { p_tone: input.tone }),
+    ...(input.point_of_view == null ? {} : { p_point_of_view: input.point_of_view }),
+    p_canon_strictness: input.canon_strictness ?? "balanced",
+    p_cover_style: input.cover_style ?? "violet",
+  });
   if (error) throw new Error(supabaseMessage(error));
-  return data as unknown as Project;
+  return data;
 }
 
 export async function listEntities(projectId: string): Promise<StoryEntity[]> {
@@ -94,7 +136,7 @@ export async function listEntities(projectId: string): Promise<StoryEntity[]> {
     .eq("project_id", projectId)
     .order("updated_at", { ascending: false });
   if (error) throw new Error(supabaseMessage(error));
-  return (data ?? []) as unknown as StoryEntity[];
+  return (data ?? []).map(mapEntity);
 }
 
 export async function upsertEntity(
@@ -110,6 +152,7 @@ export async function upsertEntity(
   const payload = {
     canon_status: "proposed" as const,
     ...row,
+    attributes: (row.attributes ?? {}) as Json,
     created_by: row.created_by ?? user?.id ?? null,
   };
   const { data, error } = await supabase
@@ -118,7 +161,7 @@ export async function upsertEntity(
     .select("*")
     .single();
   if (error) throw new Error(supabaseMessage(error));
-  return data as unknown as StoryEntity;
+  return mapEntity(data);
 }
 
 export async function deleteEntity(id: string): Promise<void> {
@@ -132,7 +175,7 @@ export async function listRelationships(projectId: string): Promise<EntityRelati
     .select("*")
     .eq("project_id", projectId);
   if (error) throw new Error(supabaseMessage(error));
-  return (data ?? []) as unknown as EntityRelationship[];
+  return data ?? [];
 }
 
 export async function listTimelines(projectId: string): Promise<Timeline[]> {
@@ -142,7 +185,7 @@ export async function listTimelines(projectId: string): Promise<Timeline[]> {
     .eq("project_id", projectId)
     .order("is_primary", { ascending: false });
   if (error) throw new Error(supabaseMessage(error));
-  return (data ?? []) as unknown as Timeline[];
+  return data ?? [];
 }
 
 export async function createTimeline(input: {
@@ -167,7 +210,7 @@ export async function createTimeline(input: {
     .select("*")
     .single();
   if (error) throw new Error(supabaseMessage(error));
-  return data as unknown as Timeline;
+  return data;
 }
 
 export async function listEvents(projectId: string): Promise<StoryEvent[]> {
@@ -175,9 +218,9 @@ export async function listEvents(projectId: string): Promise<StoryEvent[]> {
     .from("story_events")
     .select("*")
     .eq("project_id", projectId)
-    .order("sequence_order", { ascending: true });
+    .order("sequence_number", { ascending: true });
   if (error) throw new Error(supabaseMessage(error));
-  return (data ?? []) as unknown as StoryEvent[];
+  return (data ?? []).map(mapEvent);
 }
 
 export async function createEvent(input: {
@@ -188,6 +231,7 @@ export async function createEvent(input: {
   story_time?: string | null;
   sequence_order?: number;
 }): Promise<StoryEvent> {
+  if (!input.timeline_id) throw new Error("Select a timeline before adding a story beat");
   const { data, error } = await supabase
     .from("story_events")
     .insert({
@@ -196,13 +240,13 @@ export async function createEvent(input: {
       title: input.title,
       description: input.description ?? null,
       story_time: input.story_time ?? null,
-      sequence_order: input.sequence_order ?? 0,
+      sequence_number: input.sequence_order ?? 0,
       canon_status: "proposed",
     })
     .select("*")
     .single();
   if (error) throw new Error(supabaseMessage(error));
-  return data as unknown as StoryEvent;
+  return mapEvent(data);
 }
 
 export async function updateEvent(
@@ -213,12 +257,12 @@ export async function updateEvent(
 ): Promise<StoryEvent> {
   const { data, error } = await supabase
     .from("story_events")
-    .update(patch)
+    .update({ ...patch, sequence_number: patch.sequence_order, sequence_order: undefined } as never)
     .eq("id", id)
     .select("*")
     .single();
   if (error) throw new Error(supabaseMessage(error));
-  return data as unknown as StoryEvent;
+  return mapEvent(data);
 }
 
 export async function deleteEvent(id: string): Promise<void> {
@@ -231,21 +275,27 @@ export async function listDocuments(projectId: string): Promise<Document[]> {
     .from("documents")
     .select("*")
     .eq("project_id", projectId)
-    .order("position", { ascending: true });
+    .order("order_index", { ascending: true });
   if (error) throw new Error(supabaseMessage(error));
-  return ((data ?? []) as unknown as DocumentRow[]).map(mapDocument);
+  return (data ?? []).map(mapDocument);
 }
 
 export async function getDocument(id: string): Promise<Document | null> {
   const { data, error } = await supabase.from("documents").select("*").eq("id", id).maybeSingle();
   if (error) throw new Error(supabaseMessage(error));
-  return data ? mapDocument(data as unknown as DocumentRow) : null;
+  return data ? mapDocument(data) : null;
 }
 
 export async function updateDocument(id: string, patch: Partial<Document>): Promise<Document> {
-  const { content, ...rest } = patch;
-  const dbPatch: Record<string, unknown> = { ...rest };
+  const { content, position, ...rest } = patch;
+  const dbPatch: Database["public"]["Tables"]["documents"]["Update"] = {
+    title: rest.title,
+    document_type: rest.document_type,
+    status: rest.status,
+    word_count: rest.word_count,
+  };
   if (content !== undefined) dbPatch.current_content = content;
+  if (position !== undefined) dbPatch.order_index = position;
   const { data, error } = await supabase
     .from("documents")
     .update(dbPatch)
@@ -253,7 +303,7 @@ export async function updateDocument(id: string, patch: Partial<Document>): Prom
     .select("*")
     .single();
   if (error) throw new Error(supabaseMessage(error));
-  return mapDocument(data as unknown as DocumentRow);
+  return mapDocument(data);
 }
 
 export async function createDocument(
@@ -271,7 +321,7 @@ export async function createDocument(
       project_id: projectId,
       title,
       document_type,
-      position,
+      order_index: position,
       status: "draft",
       current_content: "",
       word_count: 0,
@@ -280,7 +330,7 @@ export async function createDocument(
     .select("*")
     .single();
   if (error) throw new Error(supabaseMessage(error));
-  return mapDocument(data as unknown as DocumentRow);
+  return mapDocument(data);
 }
 
 export async function listRevisions(documentId: string): Promise<DocumentRevision[]> {
@@ -290,7 +340,7 @@ export async function listRevisions(documentId: string): Promise<DocumentRevisio
     .eq("document_id", documentId)
     .order("created_at", { ascending: false });
   if (error) throw new Error(supabaseMessage(error));
-  return (data ?? []) as unknown as DocumentRevision[];
+  return data ?? [];
 }
 
 export async function createRevision(input: {
@@ -299,22 +349,14 @@ export async function createRevision(input: {
   content: string;
   change_summary?: string | null;
 }): Promise<DocumentRevision> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data, error } = await supabase
-    .from("document_revisions")
-    .insert({
-      document_id: input.document_id,
-      project_id: input.project_id,
-      content: input.content,
-      change_summary: input.change_summary ?? null,
-      created_by: user?.id ?? null,
-    })
-    .select("*")
-    .single();
+  const { data, error } = await supabase.rpc("save_document_revision", {
+    p_document_id: input.document_id,
+    p_content: input.content,
+    ...(input.change_summary == null ? {} : { p_change_summary: input.change_summary }),
+    p_revision_source: "autosave",
+  });
   if (error) throw new Error(supabaseMessage(error));
-  return data as unknown as DocumentRevision;
+  return data;
 }
 
 export async function listIssues(projectId: string): Promise<ConsistencyIssue[]> {
@@ -324,7 +366,7 @@ export async function listIssues(projectId: string): Promise<ConsistencyIssue[]>
     .eq("project_id", projectId)
     .order("created_at", { ascending: false });
   if (error) throw new Error(supabaseMessage(error));
-  return (data ?? []) as unknown as ConsistencyIssue[];
+  return (data ?? []).map(mapIssue);
 }
 
 export async function updateIssue(
@@ -334,8 +376,16 @@ export async function updateIssue(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const dbPatch: Record<string, unknown> = { ...patch };
-  if (patch.status === "resolved") {
+  const dbPatch: Database["public"]["Tables"]["consistency_issues"]["Update"] = {
+    issue_type: patch.issue_type,
+    severity: patch.severity,
+    title: patch.title,
+    explanation: patch.explanation,
+    evidence: patch.evidence as unknown as Json | undefined,
+    suggested_fix: patch.suggested_fix,
+    status: patch.status,
+  };
+  if (patch.status === "fixed") {
     dbPatch.resolved_by = user?.id ?? null;
     dbPatch.resolved_at = new Date().toISOString();
   }
@@ -346,5 +396,5 @@ export async function updateIssue(
     .select("*")
     .single();
   if (error) throw new Error(supabaseMessage(error));
-  return data as unknown as ConsistencyIssue;
+  return mapIssue(data);
 }

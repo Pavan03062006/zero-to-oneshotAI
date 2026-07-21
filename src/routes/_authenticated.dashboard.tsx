@@ -6,7 +6,6 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Users, GitBranch, Search, Plus, Sparkles, Activity } from "lucide-react";
@@ -49,13 +48,13 @@ function Dashboard() {
             Welcome back, <span className="text-gradient">{displayName}</span>
           </h1>
           <p className="mt-2 text-muted-foreground max-w-xl">
-            Every universe here keeps its own living Story DNA. Pick up a chapter, resolve
-            continuity, or seed a new world.
+            Your writing room, ready when you are. Pick up a chapter, check your story’s health, or
+            start something new.
           </p>
         </div>
         <Link to="/new-universe">
           <Button size="lg" className="gap-2 shadow-glow">
-            <Plus className="h-4 w-4" /> New universe
+            <Plus className="h-4 w-4" /> New story
           </Button>
         </Link>
       </section>
@@ -63,36 +62,36 @@ function Dashboard() {
       <section className="grid gap-4 md:grid-cols-3">
         <HealthCard
           icon={Activity}
-          label="Story DNA health"
+          label="Story health"
           value="Stable"
-          sub="Canon coverage across universes"
+          sub="Your stories are in good shape"
           tone="ok"
         />
         <HealthCard
           icon={GitBranch}
-          label="Proposed facts"
+          label="Open threads"
           value="Awaiting"
-          sub="Review candidates from recent scenes"
+          sub="Ideas waiting for your attention"
           tone="warn"
         />
         <HealthCard
           icon={Sparkles}
-          label="Continuity engine"
+          label="Continuity"
           value="Watching"
-          sub="Scans on every autosave"
+          sub="Your story stays consistent"
           tone="ok"
         />
       </section>
 
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-serif text-2xl tracking-tight">Recent universes</h2>
+          <h2 className="font-serif text-2xl tracking-tight">Your stories</h2>
           <div className="relative w-72 max-w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search universes…"
+              placeholder="Search stories…"
               className="pl-9"
             />
           </div>
@@ -131,10 +130,9 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>Draft progress</span>
-                      <span>—</span>
+                      <span>Writing status</span>
+                      <span>{p.status === "active" ? "In progress" : (p.status ?? "Draft")}</span>
                     </div>
-                    <Progress value={30} className="h-1.5" />
                     <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
                       <span className="flex items-center gap-1">
                         <BookOpen className="h-3 w-3" /> Chapters
@@ -185,14 +183,14 @@ function EmptyState() {
   return (
     <div className="rounded-2xl border border-dashed border-border/60 bg-card/30 p-12 text-center">
       <Sparkles className="mx-auto h-6 w-6 text-primary" />
-      <h3 className="font-serif text-xl mt-3">No universes yet</h3>
+      <h3 className="font-serif text-xl mt-3">Your first story starts here</h3>
       <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
-        A universe holds every character, world rule, timeline and chapter. Start with a single idea
-        — the studio will scaffold the rest.
+        Bring a premise, a mood, or one impossible question. We’ll help you shape the world around
+        it.
       </p>
       <Link to="/new-universe">
         <Button className="mt-4 gap-2">
-          <Plus className="h-4 w-4" /> Start your first universe
+          <Plus className="h-4 w-4" /> Create a story
         </Button>
       </Link>
     </div>

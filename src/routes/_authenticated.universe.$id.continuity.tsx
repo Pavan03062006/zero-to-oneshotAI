@@ -24,8 +24,8 @@ export const Route = createFileRoute("/_authenticated/universe/$id/continuity")(
   component: Continuity,
 });
 
-const SEVERITIES = ["all", "info", "warning", "critical"] as const;
-const STATUSES = ["open", "accepted", "resolved", "dismissed", "all"] as const;
+const SEVERITIES = ["all", "low", "medium", "high", "critical"] as const;
+const STATUSES = ["open", "accepted", "fixed", "dismissed", "false_positive", "all"] as const;
 
 function Continuity() {
   const { id } = useParams({ from: "/_authenticated/universe/$id/continuity" });
@@ -60,12 +60,12 @@ function Continuity() {
       <div className="rounded-3xl border border-border/60 bg-card/60 p-5 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           <div className="text-xs uppercase tracking-wider text-muted-foreground">
-            Continuity engine
+            Story consistency
           </div>
-          <div className="text-lg font-medium mt-1">Scan a chapter against your canon</div>
+          <div className="text-lg font-medium mt-1">Check your story with confidence</div>
           <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-            Pick a chapter — the engine reads its saved text against every proposed and approved
-            canon fact, then logs evidence-backed issues here.
+            Compare a saved chapter with approved Story Bible facts. Findings are evidence-backed
+            suggestions, not verdicts. Timeline and prior-chapter analysis are limited.
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -88,7 +88,7 @@ function Continuity() {
             documentId={docId || null}
             getContent={() => selectedDoc?.content ?? ""}
             size="default"
-            label="Run continuity scan"
+            label="Check story consistency"
             onComplete={(r) => setLastScan(r)}
           />
         </div>
@@ -101,9 +101,9 @@ function Continuity() {
         <div className="rounded-3xl border border-border/60 bg-card/60 p-4 flex items-center justify-between gap-3 flex-wrap">
           <div className="text-sm">
             <span className="uppercase tracking-wider text-xs text-muted-foreground mr-2">
-              Continuity score
+              Latest check
             </span>
-            <span className="font-medium">{lastScan.score}/100</span>
+            <span className="font-medium">Review recommended</span>
           </div>
           {lastScan.summary && (
             <div className="text-xs text-muted-foreground max-w-md truncate">
@@ -117,14 +117,14 @@ function Continuity() {
         <div className="flex gap-1 flex-wrap">
           {SEVERITIES.map((s) => (
             <Chip key={s} active={sev === s} onClick={() => setSev(s)}>
-              {s}
+              {s === "all" ? "All severities" : s}
             </Chip>
           ))}
         </div>
         <div className="flex gap-1 flex-wrap">
           {STATUSES.map((s) => (
             <Chip key={s} active={st === s} onClick={() => setSt(s)}>
-              {s}
+              {s === "all" ? "All statuses" : s.replace("false_positive", "dismissed")}
             </Chip>
           ))}
         </div>
@@ -139,9 +139,15 @@ function Continuity() {
       ) : filtered.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-border/60 p-10 text-center">
           <ShieldCheck className="h-6 w-6 mx-auto text-primary" />
-          <div className="text-lg font-medium mt-2">No continuity issues here</div>
+          <div className="text-lg font-medium mt-2">
+            Your story has not surfaced any findings here
+          </div>
           <div className="text-sm text-muted-foreground">
-            Run a scan on a chapter to surface evidence-backed conflicts.
+            Run a consistency check to compare this chapter with approved story information.
+          </div>
+          <div className="mx-auto mt-3 max-w-md text-xs text-muted-foreground">
+            Checks rely on approved Story Foundation facts and available chapter content. Incomplete
+            evidence can produce an uncertain finding.
           </div>
         </div>
       ) : (
@@ -150,7 +156,7 @@ function Continuity() {
             <IssueCard
               key={i.id}
               issue={i}
-              onResolve={() => mut.mutate({ id: i.id, patch: { status: "resolved" } })}
+              onResolve={() => mut.mutate({ id: i.id, patch: { status: "fixed" } })}
               onDismiss={() => mut.mutate({ id: i.id, patch: { status: "dismissed" } })}
             />
           ))}
@@ -162,13 +168,13 @@ function Continuity() {
 
 function severityIconClass(s: IssueSeverity) {
   if (s === "critical") return "text-destructive";
-  if (s === "warning") return "text-primary";
+  if (s === "high" || s === "medium") return "text-primary";
   return "text-muted-foreground";
 }
 
 function severityBadgeVariant(s: IssueSeverity): "destructive" | "default" | "outline" {
   if (s === "critical") return "destructive";
-  if (s === "warning") return "default";
+  if (s === "high" || s === "medium") return "default";
   return "outline";
 }
 
@@ -192,7 +198,7 @@ function IssueCard({
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <ShieldAlert className={`h-4 w-4 ${severityIconClass(sev)}`} />
-              <div className="text-lg font-medium">{issue.title}</div>
+              <div className="text-lg font-medium">Possible inconsistency: {issue.title}</div>
               <Badge variant={severityBadgeVariant(sev)} className="text-[10px] uppercase">
                 {issue.severity}
               </Badge>
@@ -211,7 +217,7 @@ function IssueCard({
             {issue.suggested_fix && (
               <div className="rounded-2xl border border-primary/30 bg-primary/5 p-3 mt-3 text-sm">
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Suggested fix
+                  Suggested next step
                 </div>
                 <div className="mt-1">{issue.suggested_fix}</div>
               </div>
@@ -227,7 +233,7 @@ function IssueCard({
                     <ChevronDown
                       className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`}
                     />
-                    {evidence.length} evidence row{evidence.length === 1 ? "" : "s"}
+                    View {evidence.length} evidence source{evidence.length === 1 ? "" : "s"}
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-2 mt-2">
@@ -292,6 +298,7 @@ function Chip({
   return (
     <button
       onClick={onClick}
+      aria-pressed={active}
       className={`px-3 py-1 rounded-full text-xs border transition capitalize ${active ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}
     >
       {children}

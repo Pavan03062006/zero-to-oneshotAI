@@ -33,6 +33,8 @@ import {
   Pause,
   Play,
   Square,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 import { ContinuityScanButton } from "@/components/continuity-scan-button";
 
@@ -46,6 +48,8 @@ function Chapters() {
   const docs = useQuery({ queryKey: ["docs", id], queryFn: () => listDocuments(id) });
   const issues = useQuery({ queryKey: ["issues", id], queryFn: () => listIssues(id) });
   const [selected, setSelected] = useState<string | null>(null);
+  const [chaptersOpen, setChaptersOpen] = useState(false);
+  const [contextOpen, setContextOpen] = useState(false);
   useEffect(() => {
     if (!selected && docs.data && docs.data.length) setSelected(docs.data[0].id);
   }, [docs.data, selected]);
@@ -71,81 +75,104 @@ function Chapters() {
   const list = docs.data ?? [];
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[240px_1fr_280px] min-h-[70vh]">
-      <aside className="space-y-1">
-        <div className="flex items-center justify-between mb-2">
-          <div className="text-xs uppercase tracking-wider text-muted-foreground">Chapters</div>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => create.mutate()}
-            disabled={create.isPending}
-            aria-label="Add chapter"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-        {list.length === 0 ? (
-          <div className="text-xs text-muted-foreground rounded-md border border-dashed border-border/60 p-4">
-            No chapters yet.
-          </div>
-        ) : (
-          list.map((d) => (
-            <button
-              key={d.id}
-              onClick={() => setSelected(d.id)}
-              className={`w-full text-left px-3 py-2 rounded-md text-sm border transition ${selected === d.id ? "border-primary bg-primary/10 text-primary" : "border-transparent hover:bg-card/60 text-muted-foreground hover:text-foreground"}`}
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-2 lg:hidden">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setChaptersOpen((value) => !value)}
+          aria-expanded={chaptersOpen}
+        >
+          Chapters
+        </Button>
+        <h1 className="sr-only">Writing workspace</h1>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setContextOpen((value) => !value)}
+          aria-expanded={contextOpen}
+        >
+          Context
+        </Button>
+      </div>
+      <div className="grid min-h-[70vh] gap-4 lg:grid-cols-[240px_minmax(0,1fr)_280px]">
+        <aside className={`${chaptersOpen ? "block" : "hidden"} space-y-1 lg:block`}>
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Chapters</div>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => create.mutate()}
+              disabled={create.isPending}
+              aria-label="Add chapter"
             >
-              <div className="font-medium text-foreground/90 truncate">{d.title}</div>
-              <div className="text-[10px] text-muted-foreground">{d.word_count ?? 0} words</div>
-            </button>
-          ))
-        )}
-      </aside>
-
-      {selected ? (
-        <Editor key={selected} docId={selected} />
-      ) : (
-        <div className="rounded-xl border border-dashed border-border/60 grid place-items-center text-sm text-muted-foreground">
-          Select or create a chapter to begin writing.
-        </div>
-      )}
-
-      <aside className="space-y-3">
-        <div className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-          <ShieldAlert className="h-3 w-3" /> Continuity
-        </div>
-        {issues.error ? (
-          <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs">
-            Unable to load continuity issues.
+              <Plus className="h-4 w-4" />
+            </Button>
           </div>
-        ) : (issues.data ?? []).filter((i) => i.status === "open").slice(0, 5).length === 0 ? (
-          <div className="rounded-md border border-border/60 bg-card/40 p-3 text-xs text-muted-foreground">
-            Clean canon so far. The engine is watching every save.
-          </div>
-        ) : (
-          (issues.data ?? [])
-            .filter((i) => i.status === "open")
-            .slice(0, 5)
-            .map((i) => (
-              <div key={i.id} className="rounded-md border border-border/60 bg-card/60 p-3">
-                <div className="flex items-center justify-between">
-                  <Badge
-                    variant={i.severity === "critical" ? "destructive" : "outline"}
-                    className="text-[10px]"
-                  >
-                    {i.severity}
-                  </Badge>
-                  <span className="text-[10px] text-muted-foreground">{i.status}</span>
-                </div>
-                <div className="text-sm font-medium mt-1">{i.title}</div>
-                {i.explanation && (
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{i.explanation}</p>
-                )}
-              </div>
+          {list.length === 0 ? (
+            <div className="text-xs text-muted-foreground rounded-md border border-dashed border-border/60 p-4">
+              No chapters yet.
+            </div>
+          ) : (
+            list.map((d) => (
+              <button
+                key={d.id}
+                onClick={() => setSelected(d.id)}
+                className={`w-full text-left px-3 py-2 rounded-md text-sm border transition ${selected === d.id ? "border-primary bg-primary/10 text-primary" : "border-transparent hover:bg-card/60 text-muted-foreground hover:text-foreground"}`}
+              >
+                <div className="font-medium text-foreground/90 truncate">{d.title}</div>
+                <div className="text-[10px] text-muted-foreground">{d.word_count ?? 0} words</div>
+              </button>
             ))
+          )}
+        </aside>
+
+        {selected ? (
+          <Editor key={selected} docId={selected} />
+        ) : (
+          <div className="rounded-xl border border-dashed border-border/60 grid place-items-center text-sm text-muted-foreground">
+            Select or create a chapter to begin writing.
+          </div>
         )}
-      </aside>
+
+        <aside className={`${contextOpen ? "block" : "hidden"} space-y-3 lg:block`}>
+          <div className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+            <ShieldAlert className="h-3 w-3" /> Continuity
+          </div>
+          {issues.error ? (
+            <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs">
+              Unable to load continuity issues.
+            </div>
+          ) : (issues.data ?? []).filter((i) => i.status === "open").slice(0, 5).length === 0 ? (
+            <div className="rounded-md border border-border/60 bg-card/40 p-3 text-xs text-muted-foreground">
+              Clean canon so far. The engine is watching every save.
+            </div>
+          ) : (
+            (issues.data ?? [])
+              .filter((i) => i.status === "open")
+              .slice(0, 5)
+              .map((i) => (
+                <div key={i.id} className="rounded-md border border-border/60 bg-card/60 p-3">
+                  <div className="flex items-center justify-between">
+                    <Badge
+                      variant={i.severity === "critical" ? "destructive" : "outline"}
+                      className="text-[10px]"
+                    >
+                      {i.severity}
+                    </Badge>
+                    <span className="text-[10px] text-muted-foreground">{i.status}</span>
+                  </div>
+                  <div className="text-sm font-medium mt-1">{i.title}</div>
+                  {i.explanation && (
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-3">
+                      {i.explanation}
+                    </p>
+                  )}
+                </div>
+              ))
+          )}
+        </aside>
+      </div>
     </div>
   );
 }
@@ -156,8 +183,11 @@ function Editor({ docId }: { docId: string }) {
   const q = useQuery({ queryKey: ["doc", docId], queryFn: () => getDocument(docId) });
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [state, setState] = useState<"idle" | "saving" | "saved">("idle");
+  const [state, setState] = useState<"idle" | "saving" | "saved" | "saved_without_revision">(
+    "idle",
+  );
   const [isReading, setIsReading] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -192,10 +222,13 @@ function Editor({ docId }: { docId: string }) {
           });
           qc.invalidateQueries({ queryKey: ["revisions", docId] });
         } catch {
-          /* non-fatal: revision failed but doc saved */
+          setState("saved_without_revision");
+          toast.warning("Chapter saved, but its revision checkpoint could not be created.");
+          qc.invalidateQueries({ queryKey: ["docs", projectId] });
+          return;
         }
         setState("saved");
-        qc.invalidateQueries({ queryKey: ["docs"] });
+        qc.invalidateQueries({ queryKey: ["docs", projectId] });
       } catch (e) {
         setState("idle");
         toast.error((e as Error).message);
@@ -311,7 +344,9 @@ function Editor({ docId }: { docId: string }) {
     );
 
   return (
-    <div className="rounded-xl border border-border/60 bg-card/40 p-5 flex flex-col">
+    <div
+      className={`${focusMode ? "fixed inset-0 z-50 bg-background p-6 sm:p-12" : "rounded-xl border border-border/60 bg-card/40 p-5"} flex flex-col`}
+    >
       <div className="flex items-center justify-between gap-3">
         <Input
           value={title}
@@ -319,7 +354,11 @@ function Editor({ docId }: { docId: string }) {
           className="font-serif text-xl border-0 shadow-none px-0 focus-visible:ring-0 bg-transparent"
         />
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
+          <span
+            className="text-xs text-muted-foreground flex items-center gap-1"
+            aria-live="polite"
+            aria-atomic="true"
+          >
             {state === "saving" ? (
               <>
                 <Loader2 className="h-3 w-3 animate-spin" /> Saving
@@ -327,6 +366,10 @@ function Editor({ docId }: { docId: string }) {
             ) : state === "saved" ? (
               <>
                 <Check className="h-3 w-3 text-primary" /> Saved
+              </>
+            ) : state === "saved_without_revision" ? (
+              <>
+                <ShieldAlert className="h-3 w-3 text-amber-600" /> Saved without checkpoint
               </>
             ) : (
               "Idle"
@@ -340,6 +383,14 @@ function Editor({ docId }: { docId: string }) {
             variant="outline"
             label="Run continuity scan"
           />
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setFocusMode((value) => !value)}
+            aria-label={focusMode ? "Exit focus mode" : "Enter focus mode"}
+          >
+            {focusMode ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          </Button>
           {!isReading ? (
             <Button
               size="sm"
@@ -381,30 +432,28 @@ function Editor({ docId }: { docId: string }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuLabel>In-scene assists</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => toast.message("Rewriting for tone…")}>
-                Rewrite for tone
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toast.message("Tightening prose…")}>
-                Tighten prose
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toast.message("Continuing scene…")}>
-                Continue scene
-              </DropdownMenuItem>
+              <DropdownMenuItem disabled>Rewrite for tone (not available)</DropdownMenuItem>
+              <DropdownMenuItem disabled>Tighten prose (not available)</DropdownMenuItem>
+              <DropdownMenuItem disabled>Continue scene (not available)</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => toast.message("Scanning canon…")}>
-                Check against canon
-              </DropdownMenuItem>
+              <DropdownMenuItem disabled>Use “Run continuity scan” above</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
       <div className="text-[10px] text-muted-foreground mt-1">{words.toLocaleString()} words</div>
-      <Textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="Begin the scene…"
-        className="mt-4 flex-1 min-h-[60vh] bg-transparent border-0 shadow-none focus-visible:ring-0 resize-none text-base leading-8 font-serif"
-      />
+      <div
+        contentEditable
+        suppressContentEditableWarning
+        role="textbox"
+        aria-label="Chapter editor"
+        aria-multiline="true"
+        onInput={(event) => setContent(event.currentTarget.textContent ?? "")}
+        className="mt-4 min-h-[60vh] flex-1 whitespace-pre-wrap bg-transparent px-1 py-3 text-base leading-8 font-serif outline-none"
+        data-placeholder="Begin your scene…"
+      >
+        {content}
+      </div>
     </div>
   );
 }

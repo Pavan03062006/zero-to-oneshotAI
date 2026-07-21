@@ -1,15 +1,10 @@
 export type EntityType =
-  | "character"
-  | "location"
-  | "organization"
-  | "object"
-  | "world_rule"
-  | "theme"
-  | "plot_thread";
+  "character" | "location" | "organization" | "object" | "world_rule" | "theme" | "plot_thread";
 
-export type CanonStatus = "proposed" | "approved" | "superseded" | "alternate";
+export type CanonStatus =
+  "proposed" | "approved" | "rejected" | "superseded" | "alternate" | "archived";
 
-export type DocumentType = "chapter" | "outline" | "story_bible" | "note" | "recap";
+export type DocumentType = "chapter" | "outline" | "story_bible" | "treatment" | "note";
 export type DocumentStatus = "draft" | "review" | "approved" | "published";
 
 export interface Profile {
@@ -33,7 +28,12 @@ export interface Project {
   title: string;
   premise: string;
   genre: string | null;
-  status: "draft" | "active" | "archived";
+  logline: string;
+  format: "novel" | "screenplay" | "series" | "short_story" | "other";
+  tone: string | null;
+  point_of_view: string | null;
+  canon_strictness: "flexible" | "balanced" | "strict";
+  status: "active" | "archived";
   cover_style: string;
   progress: number;
   created_at: string;
@@ -61,8 +61,9 @@ export interface EntityRelationship {
   target_entity_id: string;
   relationship_type: string;
   description: string | null;
-  starts_at_story_time: string | null;
-  ends_at_story_time: string | null;
+  start_event_id: string | null;
+  end_event_id: string | null;
+  created_by: string | null;
   canon_status: CanonStatus;
   created_at: string;
   updated_at: string;
@@ -119,14 +120,10 @@ export interface DocumentRevision {
   created_at: string;
 }
 
-export type IssueSeverity = "info" | "warning" | "critical";
-export type IssueStatus = "open" | "accepted" | "dismissed" | "resolved";
+export type IssueSeverity = "low" | "medium" | "high" | "critical";
+export type IssueStatus = "open" | "accepted" | "dismissed" | "fixed" | "false_positive";
 export type IssueType =
-  | "contradiction"
-  | "timeline"
-  | "character_voice"
-  | "world_rule"
-  | "unresolved_thread";
+  "contradiction" | "timeline" | "character_voice" | "world_rule" | "unresolved_thread";
 
 export interface IssueEvidence {
   source: string;
