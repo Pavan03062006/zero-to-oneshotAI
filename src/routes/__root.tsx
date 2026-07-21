@@ -95,9 +95,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Zero to OneShot AI — Continuity-first AI storytelling" },
-      { name: "twitter:description", content: "Turn one idea into living Story DNA. Draft canon, characters, timelines, and chapters with a continuity engine that reads like a writers' room." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/710f0112-3aaf-43ab-a1fa-892d56b0694c/id-preview-fcddcad6--2b7afebd-dece-40fd-91c2-1c04b52481b2.lovable.app-1784570102232.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/710f0112-3aaf-43ab-a1fa-892d56b0694c/id-preview-fcddcad6--2b7afebd-dece-40fd-91c2-1c04b52481b2.lovable.app-1784570102232.png" },
+      {
+        name: "twitter:description",
+        content:
+          "Turn one idea into living Story DNA. Draft canon, characters, timelines, and chapters with a continuity engine that reads like a writers' room.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/710f0112-3aaf-43ab-a1fa-892d56b0694c/id-preview-fcddcad6--2b7afebd-dece-40fd-91c2-1c04b52481b2.lovable.app-1784570102232.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/710f0112-3aaf-43ab-a1fa-892d56b0694c/id-preview-fcddcad6--2b7afebd-dece-40fd-91c2-1c04b52481b2.lovable.app-1784570102232.png",
+      },
     ],
     links: [
       {

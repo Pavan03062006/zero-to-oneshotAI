@@ -31,7 +31,14 @@ function Dashboard() {
   );
 
   const hour = new Date().getHours();
-  const greet = hour < 5 ? "Late-night writing" : hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const greet =
+    hour < 5
+      ? "Late-night writing"
+      : hour < 12
+        ? "Good morning"
+        : hour < 18
+          ? "Good afternoon"
+          : "Good evening";
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 space-y-10">
@@ -42,18 +49,39 @@ function Dashboard() {
             Welcome back, <span className="text-gradient">{displayName}</span>
           </h1>
           <p className="mt-2 text-muted-foreground max-w-xl">
-            Every universe here keeps its own living Story DNA. Pick up a chapter, resolve continuity, or seed a new world.
+            Every universe here keeps its own living Story DNA. Pick up a chapter, resolve
+            continuity, or seed a new world.
           </p>
         </div>
         <Link to="/new-universe">
-          <Button size="lg" className="gap-2 shadow-glow"><Plus className="h-4 w-4" /> New universe</Button>
+          <Button size="lg" className="gap-2 shadow-glow">
+            <Plus className="h-4 w-4" /> New universe
+          </Button>
         </Link>
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <HealthCard icon={Activity} label="Story DNA health" value="Stable" sub="Canon coverage across universes" tone="ok" />
-        <HealthCard icon={GitBranch} label="Proposed facts" value="Awaiting" sub="Review candidates from recent scenes" tone="warn" />
-        <HealthCard icon={Sparkles} label="Continuity engine" value="Watching" sub="Scans on every autosave" tone="ok" />
+        <HealthCard
+          icon={Activity}
+          label="Story DNA health"
+          value="Stable"
+          sub="Canon coverage across universes"
+          tone="ok"
+        />
+        <HealthCard
+          icon={GitBranch}
+          label="Proposed facts"
+          value="Awaiting"
+          sub="Review candidates from recent scenes"
+          tone="warn"
+        />
+        <HealthCard
+          icon={Sparkles}
+          label="Continuity engine"
+          value="Watching"
+          sub="Scans on every autosave"
+          tone="ok"
+        />
       </section>
 
       <section>
@@ -61,13 +89,20 @@ function Dashboard() {
           <h2 className="font-serif text-2xl tracking-tight">Recent universes</h2>
           <div className="relative w-72 max-w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search universes…" className="pl-9" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search universes…"
+              className="pl-9"
+            />
           </div>
         </div>
 
         {isLoading ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-44 rounded-xl" />)}
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-44 rounded-xl" />
+            ))}
           </div>
         ) : error ? (
           <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm">
@@ -82,20 +117,31 @@ function Dashboard() {
                 <Card className="group border-border/60 bg-card/60 hover:bg-card/90 hover:border-primary/40 transition h-full">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                      <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">{p.genre ?? "Unclassified"}</Badge>
+                      <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
+                        {p.genre ?? "Unclassified"}
+                      </Badge>
                       <span className="text-xs text-muted-foreground">{p.status ?? "draft"}</span>
                     </div>
-                    <div className="font-serif text-xl mt-2 group-hover:text-primary transition">{p.title}</div>
-                    <div className="text-xs text-muted-foreground line-clamp-2 mt-1">{p.premise ?? "No premise yet."}</div>
+                    <div className="font-serif text-xl mt-2 group-hover:text-primary transition">
+                      {p.title}
+                    </div>
+                    <div className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                      {p.premise ?? "No premise yet."}
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>Draft progress</span><span>—</span>
+                      <span>Draft progress</span>
+                      <span>—</span>
                     </div>
                     <Progress value={30} className="h-1.5" />
                     <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
-                      <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" /> Chapters</span>
-                      <span className="flex items-center gap-1"><Users className="h-3 w-3" /> Cast</span>
+                      <span className="flex items-center gap-1">
+                        <BookOpen className="h-3 w-3" /> Chapters
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Users className="h-3 w-3" /> Cast
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -108,7 +154,19 @@ function Dashboard() {
   );
 }
 
-function HealthCard({ icon: I, label, value, sub, tone }: { icon: any; label: string; value: string; sub: string; tone: "ok" | "warn" }) {
+function HealthCard({
+  icon: I,
+  label,
+  value,
+  sub,
+  tone,
+}: {
+  icon: any;
+  label: string;
+  value: string;
+  sub: string;
+  tone: "ok" | "warn";
+}) {
   return (
     <Card className="border-border/60 bg-card/60">
       <CardContent className="p-5">
@@ -129,9 +187,14 @@ function EmptyState() {
       <Sparkles className="mx-auto h-6 w-6 text-primary" />
       <h3 className="font-serif text-xl mt-3">No universes yet</h3>
       <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
-        A universe holds every character, world rule, timeline and chapter. Start with a single idea — the studio will scaffold the rest.
+        A universe holds every character, world rule, timeline and chapter. Start with a single idea
+        — the studio will scaffold the rest.
       </p>
-      <Link to="/new-universe"><Button className="mt-4 gap-2"><Plus className="h-4 w-4" /> Start your first universe</Button></Link>
+      <Link to="/new-universe">
+        <Button className="mt-4 gap-2">
+          <Plus className="h-4 w-4" /> Start your first universe
+        </Button>
+      </Link>
     </div>
   );
 }

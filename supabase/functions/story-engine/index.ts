@@ -8,7 +8,10 @@ const corsHeaders = {
 };
 
 const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 
 const MODEL = Deno.env.get("OPENROUTER_MODEL") ?? "google/gemini-2.5-flash";
 
@@ -21,9 +24,13 @@ function extractJson(raw: string): any {
   const fence = s.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
   if (fence) s = fence[1].trim();
   // Try direct parse
-  try { return JSON.parse(s); } catch { /* fall through */ }
+  try {
+    return JSON.parse(s);
+  } catch {
+    /* fall through */
+  }
   // Grab first {...} or [...] block
-  const first = s.search(/[\[{]/);
+  const first = s.search(/[[]{/);
   const lastObj = s.lastIndexOf("}");
   const lastArr = s.lastIndexOf("]");
   const last = Math.max(lastObj, lastArr);
@@ -38,7 +45,10 @@ async function callOpenRouter(system: string, user: string): Promise<string> {
   const key = Deno.env.get("OPENROUTER_API_KEY");
   if (!key) {
     throw new Response(
-      JSON.stringify({ error: "AI is not configured yet. Add OPENROUTER_API_KEY to Supabase Edge Function secrets." }),
+      JSON.stringify({
+        error:
+          "AI is not configured yet. Add OPENROUTER_API_KEY to Supabase Edge Function secrets.",
+      }),
       { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
@@ -61,19 +71,39 @@ async function callOpenRouter(system: string, user: string): Promise<string> {
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Response(JSON.stringify({ error: `OpenRouter ${res.status}: ${text.slice(0, 300)}` }), {
-      status: res.status === 401 ? 503 : 502,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    throw new Response(
+      JSON.stringify({ error: `OpenRouter ${res.status}: ${text.slice(0, 300)}` }),
+      {
+        status: res.status === 401 ? 503 : 502,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
   const data = await res.json();
   return data?.choices?.[0]?.message?.content ?? "";
 }
 
-const ENTITY_TYPES = new Set(["character", "location", "organization", "object", "world_rule", "theme", "plot_thread"]);
+const ENTITY_TYPES = new Set([
+  "character",
+  "location",
+  "organization",
+  "object",
+  "world_rule",
+  "theme",
+  "plot_thread",
+]);
 
-async function generateStoryDna(supabase: any, projectId: string, creativeDirection: string, userId: string | null) {
-  const { data: project, error: pErr } = await supabase.from("projects").select("*").eq("id", projectId).single();
+async function generateStoryDna(
+  supabase: any,
+  projectId: string,
+  creativeDirection: string,
+  userId: string | null,
+) {
+  const { data: project, error: pErr } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("id", projectId)
+    .single();
   if (pErr || !project) return json({ error: "Project not found" }, 404);
 
   const system = `You are a story development engine. Return STRICT JSON only, no markdown, no prose.
@@ -147,19 +177,27 @@ Return JSON only.`;
     const title = String(parsed.document.title || "Story Bible").slice(0, 200);
     const content = parsed.document.content as string;
     const { data: posRow } = await supabase
-      .from("documents").select("position").eq("project_id", projectId)
-      .order("position", { ascending: false }).limit(1).maybeSingle();
+      .from("documents")
+      .select("position")
+      .eq("project_id", projectId)
+      .order("position", { ascending: false })
+      .limit(1)
+      .maybeSingle();
     const nextPos = ((posRow?.position as number | undefined) ?? -1) + 1;
-    const { data, error } = await supabase.from("documents").insert({
-      project_id: projectId,
-      title,
-      document_type: "story_bible",
-      position: nextPos,
-      status: "draft",
-      current_content: content,
-      word_count: content.split(/\s+/).filter(Boolean).length,
-      created_by: userId,
-    }).select("id, title, status").single();
+    const { data, error } = await supabase
+      .from("documents")
+      .insert({
+        project_id: projectId,
+        title,
+        document_type: "story_bible",
+        position: nextPos,
+        status: "draft",
+        current_content: content,
+        word_count: content.split(/\s+/).filter(Boolean).length,
+        created_by: userId,
+      })
+      .select("id, title, status")
+      .single();
     if (error) return json({ error: `Failed to save Story Bible: ${error.message}` }, 500);
     document = data;
   }
@@ -175,10 +213,18 @@ Return JSON only.`;
   });
 }
 
-async function analyzeContinuity(supabase: any, projectId: string, documentId: string, content: string) {
+async function analyzeContinuity(
+  supabase: any,
+  projectId: string,
+  documentId: string,
+  content: string,
+) {
   const { data: entities } = await supabase
-    .from("story_entities").select("name, entity_type, summary, canon_status")
-    .eq("project_id", projectId).eq("canon_status", "approved").limit(80);
+    .from("story_entities")
+    .select("name, entity_type, summary, canon_status")
+    .eq("project_id", projectId)
+    .eq("canon_status", "approved")
+    .limit(80);
 
   const system = `You are a continuity editor. Return STRICT JSON only:
 {
@@ -206,7 +252,13 @@ Return JSON only.`;
   const parsed = extractJson(raw);
 
   const severities = new Set(["info", "warning", "critical"]);
-  const types = new Set(["contradiction", "timeline", "character_voice", "world_rule", "unresolved_thread"]);
+  const types = new Set([
+    "contradiction",
+    "timeline",
+    "character_voice",
+    "world_rule",
+    "unresolved_thread",
+  ]);
   const issuesIn = Array.isArray(parsed.issues) ? parsed.issues : [];
 
   const rows = issuesIn
@@ -239,6 +291,133 @@ Return JSON only.`;
   });
 }
 
+async function generateDevelopmentPack(
+  supabase: any,
+  projectId: string,
+  format: string,
+  direction: string,
+  userId: string | null,
+) {
+  const { data: project, error } = await supabase
+    .from("projects")
+    .select("title, genre, premise")
+    .eq("id", projectId)
+    .single();
+  if (error || !project) return json({ error: "Project not found" }, 404);
+  const movie = format === "movie";
+  const system = `You are an experienced story editor and screenwriter. Return STRICT JSON only.
+Schema: {
+  "suggestions": string[],
+  "character_arcs": [{"name": string, "role": string, "want": string, "need": string, "flaw": string, "arc": string}],
+  "beats": [{"title": string, "purpose": string, "turning_point": string}],
+  "document": {"title": string, "content": string}
+}
+Give concrete, usable development material. ${movie ? "For a feature film, structure 12-15 cinematic beats across setup, escalation, midpoint, crisis, climax, and resolution; include visual set pieces and a strong ending." : "For an ongoing story, create a flexible next-act plan with 8-10 beats, escalating conflict, character growth, and future branch opportunities."}
+Keep every character arc specific to the premise and avoid generic advice.`;
+  const user = `PROJECT\nTitle: ${project.title}\nGenre: ${project.genre ?? "unspecified"}\nPremise: ${project.premise ?? ""}\n\nDIRECTION\n${direction || "Explore the strongest version of this story."}\n\nReturn JSON only.`;
+  const parsed = extractJson(await callOpenRouter(system, user));
+  const suggestions = Array.isArray(parsed.suggestions)
+    ? parsed.suggestions.map((v: unknown) => String(v)).slice(0, 12)
+    : [];
+  const arcs = Array.isArray(parsed.character_arcs)
+    ? parsed.character_arcs.filter((v: any) => v && typeof v.name === "string").slice(0, 12)
+    : [];
+  const beats = Array.isArray(parsed.beats)
+    ? parsed.beats.filter((v: any) => v && typeof v.title === "string").slice(0, 20)
+    : [];
+  const { data: existingCharacters } = await supabase
+    .from("story_entities")
+    .select("name, entity_type")
+    .eq("project_id", projectId)
+    .eq("entity_type", "character");
+  const existingNames = new Set(
+    (existingCharacters ?? []).map((entity: any) => String(entity.name).trim().toLowerCase()),
+  );
+  const generatedNames = new Set<string>();
+  const entityRows = arcs
+    .map((arc: any) => ({
+      project_id: projectId,
+      entity_type: "character",
+      name: String(arc.name).trim().slice(0, 200),
+      summary: String(arc.arc || arc.need || "").slice(0, 1000) || null,
+      attributes: { role: arc.role, want: arc.want, need: arc.need, flaw: arc.flaw, arc: arc.arc },
+      canon_status: "proposed",
+      created_by: userId,
+    }))
+    .filter((entity: any) => {
+      const key = entity.name.toLowerCase();
+      if (!entity.name || existingNames.has(key) || generatedNames.has(key)) return false;
+      generatedNames.add(key);
+      return true;
+    });
+  let characterArcs: any[] = [];
+  if (entityRows.length) {
+    const result = await supabase.from("story_entities").insert(entityRows).select("*");
+    if (result.error)
+      return json({ error: `Failed to save character development: ${result.error.message}` }, 500);
+    characterArcs = result.data ?? [];
+  }
+  if (beats.length) {
+    const { data: primaryTimeline } = await supabase
+      .from("timelines")
+      .select("id")
+      .eq("project_id", projectId)
+      .eq("is_primary", true)
+      .maybeSingle();
+    const eventRows = beats.map((beat: any, index: number) => ({
+      project_id: projectId,
+      timeline_id: primaryTimeline?.id ?? null,
+      title: String(beat.title).slice(0, 200),
+      description:
+        String(beat.purpose || beat.turning_point || "Generated story beat.").slice(0, 1000) ||
+        "Generated story beat.",
+      sequence_order: index,
+      emotional_impact: null,
+      canon_status: "proposed",
+    }));
+    const result = await supabase.from("story_events").insert(eventRows);
+    if (result.error)
+      return json({ error: `Failed to save story beats: ${result.error.message}` }, 500);
+  }
+  let document: any = null;
+  if (parsed.document && typeof parsed.document.content === "string") {
+    const { data: posRow } = await supabase
+      .from("documents")
+      .select("position")
+      .eq("project_id", projectId)
+      .order("position", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const result = await supabase
+      .from("documents")
+      .insert({
+        project_id: projectId,
+        title: String(
+          parsed.document.title || (movie ? "Feature Film Treatment" : "Next Story Act"),
+        ).slice(0, 200),
+        document_type: "outline",
+        position: ((posRow?.position as number | undefined) ?? -1) + 1,
+        status: "draft",
+        current_content: parsed.document.content,
+        word_count: String(parsed.document.content).split(/\s+/).filter(Boolean).length,
+        created_by: userId,
+      })
+      .select("id, title, status")
+      .single();
+    if (result.error)
+      return json({ error: `Failed to save development plan: ${result.error.message}` }, 500);
+    document = result.data;
+  }
+  return json({
+    ok: true,
+    model: MODEL,
+    suggestions,
+    character_arcs: characterArcs,
+    beats,
+    document,
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
@@ -265,8 +444,19 @@ Deno.serve(async (req) => {
       return await generateStoryDna(supabase, body.projectId, body.creativeDirection ?? "", userId);
     }
     if (action === "analyze_continuity") {
-      if (!body.projectId || !body.documentId) return json({ error: "projectId and documentId required" }, 400);
+      if (!body.projectId || !body.documentId)
+        return json({ error: "projectId and documentId required" }, 400);
       return await analyzeContinuity(supabase, body.projectId, body.documentId, body.content ?? "");
+    }
+    if (action === "generate_development_pack") {
+      if (!body.projectId) return json({ error: "projectId required" }, 400);
+      return await generateDevelopmentPack(
+        supabase,
+        body.projectId,
+        body.format ?? "story",
+        body.direction ?? "",
+        userId,
+      );
     }
     return json({ error: `Unknown action: ${action}` }, 400);
   } catch (err) {

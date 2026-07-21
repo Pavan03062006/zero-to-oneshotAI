@@ -24,27 +24,65 @@ function Overview() {
   const proposed = (entities.data ?? []).filter((e) => e.canon_status === "proposed").length;
   const openIssues = (issues.data ?? []).filter((i) => i.status === "open");
 
-  const health = approved + proposed === 0 ? 0 : Math.round((approved / (approved + proposed)) * 100);
+  const health =
+    approved + proposed === 0 ? 0 : Math.round((approved / (approved + proposed)) * 100);
 
-  if (loading) return <div className="grid gap-4 md:grid-cols-3">{Array.from({length: 6}).map((_,i)=><Skeleton key={i} className="h-32 rounded-xl" />)}</div>;
-  if (entities.error || docs.error || issues.error || events.error) return <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm">Unable to load this universe overview. Refresh to retry.</div>;
+  if (loading)
+    return (
+      <div className="grid gap-4 md:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-32 rounded-xl" />
+        ))}
+      </div>
+    );
+  if (entities.error || docs.error || issues.error || events.error)
+    return (
+      <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm">
+        Unable to load this universe overview. Refresh to retry.
+      </div>
+    );
 
   return (
     <div className="space-y-8">
       <div className="grid gap-4 md:grid-cols-4">
-        <Stat icon={Users} label="Characters" value={characters.length} sub={`${entities.data?.length ?? 0} total entities`} />
-        <Stat icon={BookOpen} label="Chapters" value={docs.data?.length ?? 0} sub="Living manuscript" />
-        <Stat icon={Clock} label="Story events" value={events.data?.length ?? 0} sub="Across all timelines" />
-        <Stat icon={ShieldAlert} label="Open continuity" value={openIssues.length} sub="Awaiting resolution" tone={openIssues.length > 0 ? "warn" : "ok"} />
+        <Stat
+          icon={Users}
+          label="Characters"
+          value={characters.length}
+          sub={`${entities.data?.length ?? 0} total entities`}
+        />
+        <Stat
+          icon={BookOpen}
+          label="Chapters"
+          value={docs.data?.length ?? 0}
+          sub="Living manuscript"
+        />
+        <Stat
+          icon={Clock}
+          label="Story events"
+          value={events.data?.length ?? 0}
+          sub="Across all timelines"
+        />
+        <Stat
+          icon={ShieldAlert}
+          label="Open continuity"
+          value={openIssues.length}
+          sub="Awaiting resolution"
+          tone={openIssues.length > 0 ? "warn" : "ok"}
+        />
       </div>
 
       <Card className="border-border/60 bg-card/60">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Canon health</div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                Canon health
+              </div>
               <div className="font-serif text-3xl mt-1">{health}%</div>
-              <div className="text-sm text-muted-foreground mt-1">{approved} approved · {proposed} proposed facts</div>
+              <div className="text-sm text-muted-foreground mt-1">
+                {approved} approved · {proposed} proposed facts
+              </div>
             </div>
             <Sparkles className="h-6 w-6 text-primary" />
           </div>
@@ -53,10 +91,30 @@ function Overview() {
       </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <QuickLink id={id} to={`/universe/${id}/chapters`} title="Pick up writing" desc="Open the last chapter and let autosave handle the rest." />
-        <QuickLink id={id} to={`/universe/${id}/continuity`} title="Resolve continuity" desc="Review flagged conflicts with cited canon sources." />
-        <QuickLink id={id} to={`/universe/${id}/characters`} title="Deepen a character" desc="Refine goals, fears, and voice as your story evolves." />
-        <QuickLink id={id} to={`/universe/${id}/timeline`} title="Trace the timeline" desc="Zoom the cinematic timeline or branch an alternate." />
+        <QuickLink
+          id={id}
+          to={`/universe/${id}/chapters`}
+          title="Pick up writing"
+          desc="Open the last chapter and let autosave handle the rest."
+        />
+        <QuickLink
+          id={id}
+          to={`/universe/${id}/continuity`}
+          title="Resolve continuity"
+          desc="Review flagged conflicts with cited canon sources."
+        />
+        <QuickLink
+          id={id}
+          to={`/universe/${id}/characters`}
+          title="Deepen a character"
+          desc="Refine goals, fears, and voice as your story evolves."
+        />
+        <QuickLink
+          id={id}
+          to={`/universe/${id}/timeline`}
+          title="Trace the timeline"
+          desc="Zoom the cinematic timeline or branch an alternate."
+        />
       </div>
     </div>
   );

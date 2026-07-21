@@ -3,7 +3,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck, ScanSearch } from "lucide-react";
-import { analyzeContinuity, STATUS_COPY, StoryEngineError, type AnalyzeContinuityResult } from "@/lib/story-engine";
+import {
+  analyzeContinuity,
+  STATUS_COPY,
+  StoryEngineError,
+  type AnalyzeContinuityResult,
+} from "@/lib/story-engine";
 
 export function ContinuityScanButton({
   projectId,
@@ -27,12 +32,18 @@ export function ContinuityScanButton({
 
   const mut = useMutation({
     mutationFn: () => {
-      if (!documentId) throw new StoryEngineError("Select a chapter first", { friendly: "Select a chapter to scan." });
+      if (!documentId)
+        throw new StoryEngineError("Select a chapter first", {
+          friendly: "Select a chapter to scan.",
+        });
       return analyzeContinuity({ projectId, documentId, content: getContent() });
     },
     onSuccess: (data) => {
       const n = data.issues?.length ?? 0;
-      if (n === 0) toast.success(`Canon intact — no issues found${typeof data.score === "number" ? ` (score ${data.score}/100)` : ""}`);
+      if (n === 0)
+        toast.success(
+          `Canon intact — no issues found${typeof data.score === "number" ? ` (score ${data.score}/100)` : ""}`,
+        );
       else toast.message(`Continuity scan complete — ${n} issue${n === 1 ? "" : "s"} logged`);
       qc.invalidateQueries({ queryKey: ["issues", projectId] });
       onComplete?.(data);
@@ -45,7 +56,10 @@ export function ContinuityScanButton({
   useEffect(() => {
     if (!mut.isPending) return;
     setStatusIdx(0);
-    const id = setInterval(() => setStatusIdx((i) => (i + 1) % STATUS_COPY.continuity.length), 1800);
+    const id = setInterval(
+      () => setStatusIdx((i) => (i + 1) % STATUS_COPY.continuity.length),
+      1800,
+    );
     return () => clearInterval(id);
   }, [mut.isPending]);
 
@@ -58,10 +72,23 @@ export function ContinuityScanButton({
         disabled={mut.isPending || !documentId}
         className="gap-2 uppercase tracking-wider"
       >
-        {mut.isPending ? <><Loader2 className="h-4 w-4 animate-spin" /> Scanning</> : <><ScanSearch className="h-4 w-4" /> {label}</>}
+        {mut.isPending ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" /> Scanning
+          </>
+        ) : (
+          <>
+            <ScanSearch className="h-4 w-4" /> {label}
+          </>
+        )}
       </Button>
       {mut.isPending && (
-        <span className="text-xs text-muted-foreground motion-safe:animate-pulse" aria-live="polite">{STATUS_COPY.continuity[statusIdx]}</span>
+        <span
+          className="text-xs text-muted-foreground motion-safe:animate-pulse"
+          aria-live="polite"
+        >
+          {STATUS_COPY.continuity[statusIdx]}
+        </span>
       )}
     </div>
   );
@@ -72,7 +99,11 @@ export function ContinuityScanSuccess({ score, summary }: { score?: number; summ
     <div className="rounded-3xl border border-primary/30 bg-primary/5 p-6 text-center">
       <ShieldCheck className="h-6 w-6 mx-auto text-primary" />
       <div className="text-lg font-medium mt-2">Canon holds</div>
-      {typeof score === "number" && <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">Continuity score {score}/100</div>}
+      {typeof score === "number" && (
+        <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">
+          Continuity score {score}/100
+        </div>
+      )}
       {summary && <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">{summary}</p>}
     </div>
   );

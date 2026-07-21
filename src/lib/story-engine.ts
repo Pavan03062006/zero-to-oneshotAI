@@ -21,6 +21,22 @@ export interface AnalyzeContinuityResult {
   issues: ConsistencyIssue[];
 }
 
+export interface DevelopmentPackResult {
+  ok: boolean;
+  model: string;
+  suggestions: string[];
+  character_arcs: Array<{
+    name: string;
+    role: string;
+    want: string;
+    need: string;
+    flaw: string;
+    arc: string;
+  }>;
+  beats: Array<{ title: string; purpose: string; turning_point: string }>;
+  document: { id: string; title: string; status: string } | null;
+}
+
 export class StoryEngineError extends Error {
   status: number;
   code?: string;
@@ -40,21 +56,30 @@ async function parseFunctionsError(err: unknown): Promise<StoryEngineError> {
     const status = res?.status ?? 500;
     try {
       const text = res ? await res.clone().text() : "";
-      try { body = text ? JSON.parse(text) : null; } catch { body = text || null; }
-    } catch { /* ignore */ }
+      try {
+        body = text ? JSON.parse(text) : null;
+      } catch {
+        body = text || null;
+      }
+    } catch {
+      /* ignore */
+    }
     const msg =
       (body && typeof body === "object" && (body.error || body.message)) ||
       (typeof body === "string" ? body : "") ||
       err.message;
     let friendly = msg;
     if (status === 503) {
-      friendly = "AI isn't configured yet. Ask your workspace admin to add the story-engine credentials in Cloud settings.";
+      friendly =
+        "AI isn't configured yet. Ask your workspace admin to add the story-engine credentials in Cloud settings.";
     } else if (status === 401 || status === 403) {
       friendly = "Your session expired. Sign in again to continue.";
     } else if (status === 408 || status === 504) {
       friendly = "The story engine timed out. Try again in a moment.";
     } else if (status >= 500) {
-      friendly = "The story engine hit an error. Try again shortly.";
+      friendly = /internal server error/i.test(String(msg))
+        ? "The story engine hit an error. Try again shortly."
+        : String(msg);
     }
     return new StoryEngineError(String(msg), { status, code: body?.code, friendly });
   }
@@ -99,6 +124,70 @@ export async function analyzeContinuity(input: {
   });
   if (error) throw await parseFunctionsError(error);
   return data as AnalyzeContinuityResult;
+}
+
+export async function generateDevelopmentPack(input: {
+  projectId: string;
+  format: "story" | "movie";
+  direction?: string;
+}): Promise<DevelopmentPackResult> {
+  const direction = input.direction?.trim() ?? "";
+  const { data, error } = await supabase.functions.invoke("story-engine", {
+    body: {
+      action: "generate_development_pack",
+      projectId: input.projectId,
+      format: input.format,
+      direction,
+    },
+  });
+  if (!error) return data as DevelopmentPackResult;
+
+  // Keep this workflow usable against older deployments while the updated
+  // Edge Function is being deployed from the repository.
+  const parsedError = await parseFunctionsError(error);
+  if (!/unknown action/i.test(parsedError.message)) throw parsedError;
+  const legacy = await generateStoryDna({
+    projectId: input.projectId,
+    creativeDirection: [
+      input.format === "movie"
+        ? "Create a complete feature-film treatment with a strong three-act storyline, cinematic beats, character growth, and a satisfying ending."
+        : "Expand the story with new plot directions, stronger character development, escalating conflict, and several future story branches.",
+      direction,
+    ]
+      .filter(Boolean)
+      .join("\n\n"),
+  });
+  const characterArcs = (legacy.entities ?? [])
+    .filter((entity) => entity.entity_type === "character")
+    .map((entity) => {
+      const attributes = (
+        entity.attributes && typeof entity.attributes === "object" ? entity.attributes : {}
+      ) as Record<string, unknown>;
+      return {
+        name: String(entity.name ?? "Character"),
+        role: String(attributes.role ?? "Character"),
+        want: String(attributes.want ?? ""),
+        need: String(attributes.need ?? ""),
+        flaw: String(attributes.fear ?? attributes.flaw ?? ""),
+        arc: String(entity.summary ?? ""),
+      };
+    });
+  const beats = (legacy.events ?? []).map((event) => ({
+    title: String(event.title ?? "Story beat"),
+    purpose: String(event.description ?? ""),
+    turning_point: String(event.emotional_impact ?? ""),
+  }));
+  return {
+    ok: true,
+    model: legacy.model,
+    suggestions: [
+      legacy.logline,
+      ...(legacy.themes ?? []).map((theme) => `Explore the theme of ${theme}.`),
+    ].filter(Boolean),
+    character_arcs: characterArcs,
+    beats,
+    document: legacy.document ?? null,
+  };
 }
 
 export const STATUS_COPY = {

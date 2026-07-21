@@ -20,8 +20,29 @@ function mapDocument(row: DocumentRow): Document {
   return { ...rest, content: current_content ?? "" };
 }
 
-function supabaseMessage(error: { message?: string; hint?: string | null; details?: string | null }): string {
-  return [error.message, error.hint, error.details].filter(Boolean).join(" · ") || "Supabase request failed";
+function supabaseMessage(error: {
+  message?: string;
+  hint?: string | null;
+  details?: string | null;
+}): string {
+  return (
+    [error.message, error.hint, error.details].filter(Boolean).join(" · ") ||
+    "Supabase request failed"
+  );
+}
+
+export async function updateProject(
+  id: string,
+  patch: Partial<Pick<Project, "title" | "premise" | "genre" | "status" | "cover_style">>,
+): Promise<Project> {
+  const { data, error } = await supabase
+    .from("projects")
+    .update(patch)
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (error) throw new Error(supabaseMessage(error));
+  return data as unknown as Project;
 }
 
 export async function listProjects(): Promise<Project[]> {
@@ -76,28 +97,77 @@ export async function listEntities(projectId: string): Promise<StoryEntity[]> {
   return (data ?? []) as unknown as StoryEntity[];
 }
 
-export async function upsertEntity(row: Partial<StoryEntity> & { project_id: string; name: string; entity_type: StoryEntity["entity_type"] }): Promise<StoryEntity> {
-  const { data: { user } } = await supabase.auth.getUser();
+export async function upsertEntity(
+  row: Partial<StoryEntity> & {
+    project_id: string;
+    name: string;
+    entity_type: StoryEntity["entity_type"];
+  },
+): Promise<StoryEntity> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const payload = {
     canon_status: "proposed" as const,
     ...row,
     created_by: row.created_by ?? user?.id ?? null,
   };
-  const { data, error } = await supabase.from("story_entities").upsert(payload).select("*").single();
+  const { data, error } = await supabase
+    .from("story_entities")
+    .upsert(payload)
+    .select("*")
+    .single();
   if (error) throw new Error(supabaseMessage(error));
   return data as unknown as StoryEntity;
 }
 
+export async function deleteEntity(id: string): Promise<void> {
+  const { error } = await supabase.from("story_entities").delete().eq("id", id);
+  if (error) throw new Error(supabaseMessage(error));
+}
+
 export async function listRelationships(projectId: string): Promise<EntityRelationship[]> {
-  const { data, error } = await supabase.from("entity_relationships").select("*").eq("project_id", projectId);
+  const { data, error } = await supabase
+    .from("entity_relationships")
+    .select("*")
+    .eq("project_id", projectId);
   if (error) throw new Error(supabaseMessage(error));
   return (data ?? []) as unknown as EntityRelationship[];
 }
 
 export async function listTimelines(projectId: string): Promise<Timeline[]> {
-  const { data, error } = await supabase.from("timelines").select("*").eq("project_id", projectId).order("is_primary", { ascending: false });
+  const { data, error } = await supabase
+    .from("timelines")
+    .select("*")
+    .eq("project_id", projectId)
+    .order("is_primary", { ascending: false });
   if (error) throw new Error(supabaseMessage(error));
   return (data ?? []) as unknown as Timeline[];
+}
+
+export async function createTimeline(input: {
+  project_id: string;
+  name: string;
+  description?: string | null;
+  parent_timeline_id?: string | null;
+  branch_point?: string | null;
+}): Promise<Timeline> {
+  const { data, error } = await supabase
+    .from("timelines")
+    .insert({
+      project_id: input.project_id,
+      name: input.name,
+      // The database requires a description even for a newly-created branch.
+      description:
+        input.description?.trim() || "Alternate timeline branched from the primary canon.",
+      parent_timeline_id: input.parent_timeline_id ?? null,
+      branch_point: input.branch_point ?? null,
+      is_primary: false,
+    })
+    .select("*")
+    .single();
+  if (error) throw new Error(supabaseMessage(error));
+  return data as unknown as Timeline;
 }
 
 export async function listEvents(projectId: string): Promise<StoryEvent[]> {
@@ -135,6 +205,27 @@ export async function createEvent(input: {
   return data as unknown as StoryEvent;
 }
 
+export async function updateEvent(
+  id: string,
+  patch: Partial<
+    Pick<StoryEvent, "title" | "description" | "story_time" | "sequence_order" | "timeline_id">
+  >,
+): Promise<StoryEvent> {
+  const { data, error } = await supabase
+    .from("story_events")
+    .update(patch)
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (error) throw new Error(supabaseMessage(error));
+  return data as unknown as StoryEvent;
+}
+
+export async function deleteEvent(id: string): Promise<void> {
+  const { error } = await supabase.from("story_events").delete().eq("id", id);
+  if (error) throw new Error(supabaseMessage(error));
+}
+
 export async function listDocuments(projectId: string): Promise<Document[]> {
   const { data, error } = await supabase
     .from("documents")
@@ -155,7 +246,12 @@ export async function updateDocument(id: string, patch: Partial<Document>): Prom
   const { content, ...rest } = patch;
   const dbPatch: Record<string, unknown> = { ...rest };
   if (content !== undefined) dbPatch.current_content = content;
-  const { data, error } = await supabase.from("documents").update(dbPatch).eq("id", id).select("*").single();
+  const { data, error } = await supabase
+    .from("documents")
+    .update(dbPatch)
+    .eq("id", id)
+    .select("*")
+    .single();
   if (error) throw new Error(supabaseMessage(error));
   return mapDocument(data as unknown as DocumentRow);
 }
@@ -166,7 +262,9 @@ export async function createDocument(
   position: number,
   document_type: DocumentType = "chapter",
 ): Promise<Document> {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const { data, error } = await supabase
     .from("documents")
     .insert({
@@ -201,7 +299,9 @@ export async function createRevision(input: {
   content: string;
   change_summary?: string | null;
 }): Promise<DocumentRevision> {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const { data, error } = await supabase
     .from("document_revisions")
     .insert({
@@ -227,14 +327,24 @@ export async function listIssues(projectId: string): Promise<ConsistencyIssue[]>
   return (data ?? []) as unknown as ConsistencyIssue[];
 }
 
-export async function updateIssue(id: string, patch: Partial<ConsistencyIssue>): Promise<ConsistencyIssue> {
-  const { data: { user } } = await supabase.auth.getUser();
+export async function updateIssue(
+  id: string,
+  patch: Partial<ConsistencyIssue>,
+): Promise<ConsistencyIssue> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const dbPatch: Record<string, unknown> = { ...patch };
   if (patch.status === "resolved") {
     dbPatch.resolved_by = user?.id ?? null;
     dbPatch.resolved_at = new Date().toISOString();
   }
-  const { data, error } = await supabase.from("consistency_issues").update(dbPatch).eq("id", id).select("*").single();
+  const { data, error } = await supabase
+    .from("consistency_issues")
+    .update(dbPatch)
+    .eq("id", id)
+    .select("*")
+    .single();
   if (error) throw new Error(supabaseMessage(error));
   return data as unknown as ConsistencyIssue;
 }

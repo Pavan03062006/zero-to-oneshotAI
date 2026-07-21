@@ -21,7 +21,12 @@ function World() {
   const { id } = useParams({ from: "/_authenticated/universe/$id/world" });
   const q = useQuery({ queryKey: ["entities", id], queryFn: () => listEntities(id) });
   if (q.isLoading) return <Skeleton className="h-64 rounded-xl" />;
-  if (q.error) return <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm">Unable to load the world data. Refresh to retry.</div>;
+  if (q.error)
+    return (
+      <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm">
+        Unable to load the world data. Refresh to retry.
+      </div>
+    );
   const entities = q.data ?? [];
   return (
     <div className="space-y-8">
@@ -35,7 +40,9 @@ function World() {
               <span className="text-xs text-muted-foreground">· {rows.length}</span>
             </div>
             {rows.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-border/60 p-6 text-xs text-muted-foreground">No {label.toLowerCase()} in canon yet.</div>
+              <div className="rounded-lg border border-dashed border-border/60 p-6 text-xs text-muted-foreground">
+                No {label.toLowerCase()} in canon yet.
+              </div>
             ) : (
               <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                 {rows.map((e) => (
@@ -45,7 +52,9 @@ function World() {
                         <div className="font-serif">{e.name}</div>
                         <CanonPill status={e.canon_status} />
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{e.summary ?? "No summary."}</p>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-3">
+                        {e.summary ?? "No summary."}
+                      </p>
                     </CardContent>
                   </Card>
                 ))}

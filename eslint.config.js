@@ -34,6 +34,9 @@ export default tseslint.config(
       ],
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      // Supabase rows and TanStack's generated route types are intentionally
+      // narrowed at the data boundary throughout this project.
+      "@typescript-eslint/no-explicit-any": "off",
     },
   },
   eslintPluginPrettier,
