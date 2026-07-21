@@ -1,0 +1,199 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Caldera design system for Zero to OneShot AI.
+ * Warm limestone canvas, molten ember accents, flat and shadowless.
+ */
+
+@theme inline {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Bebas Neue", "Anton", "Oswald", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bebas Neue", "Anton", "Oswald", ui-sans-serif, system-ui, sans-serif;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-2xl: 40px;
+  --radius-3xl: 40px;
+  --radius-4xl: 40px;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-ember: var(--ember);
+  --color-plasma: var(--plasma);
+  --color-sulfur: var(--sulfur);
+  --color-limestone: var(--limestone);
+  --color-pumice: var(--pumice);
+  --color-obsidian: var(--obsidian);
+  --color-chalk: var(--chalk);
+}
+
+:root {
+  --radius: 40px;
+
+  /* Caldera palette (hex — no shadows, flat surfaces) */
+  --ember: #fc5000;
+  --plasma: #524ae9;
+  --sulfur: #f5f28e;
+  --limestone: #f7f6f2;
+  --pumice: #e2e2df;
+  --obsidian: #070607;
+  --chalk: #ffffff;
+
+  /* Semantic shadcn tokens mapped to Caldera */
+  --background: #e2e2df;      /* Pumice canvas */
+  --foreground: #070607;      /* Obsidian text */
+  --card: #f7f6f2;            /* Limestone surface */
+  --card-foreground: #070607;
+  --popover: #f7f6f2;
+  --popover-foreground: #070607;
+  --primary: #fc5000;         /* Ember */
+  --primary-foreground: #070607;
+  --secondary: #f7f6f2;
+  --secondary-foreground: #070607;
+  --muted: #eeece7;
+  --muted-foreground: #5a5854;
+  --accent: #f5f28e;          /* Sulfur */
+  --accent-foreground: #070607;
+  --destructive: #fc5000;     /* Continuity warnings use Ember, not red */
+  --destructive-foreground: #ffffff;
+  --border: rgba(7, 6, 7, 0.12);
+  --input: rgba(7, 6, 7, 0.16);
+  --ring: #fc5000;
+  --chart-1: #fc5000;
+  --chart-2: #524ae9;
+  --chart-3: #f5f28e;
+  --chart-4: #070607;
+  --chart-5: #b0aea8;
+  --sidebar: #f7f6f2;
+  --sidebar-foreground: #070607;
+  --sidebar-primary: #fc5000;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e2e2df;
+  --sidebar-accent-foreground: #070607;
+  --sidebar-border: rgba(7, 6, 7, 0.12);
+  --sidebar-ring: #fc5000;
+}
+
+/* Caldera is a light-only system; the .dark class inherits :root values. */
+.dark { color-scheme: light; }
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 {
+    font-family: "Bebas Neue", "Anton", "Oswald", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 0.96;
+    text-transform: uppercase;
+  }
+}
+
+/* Halftone motifs — orange dots pressed into a violet→ember gradient */
+@utility halftone-hero {
+  background-color: #524ae9;
+  background-image:
+    radial-gradient(circle at center, #fc5000 22%, transparent 24%),
+    radial-gradient(circle at center, #fc5000 22%, transparent 24%),
+    linear-gradient(135deg, #524ae9 0%, #7a3fd0 35%, #fc5000 100%);
+  background-size: 14px 14px, 14px 14px, 100% 100%;
+  background-position: 0 0, 7px 7px, 0 0;
+}
+@utility halftone-ember {
+  background-color: #fc5000;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.35) 22%, transparent 24%),
+    radial-gradient(circle, rgba(255,255,255,0.35) 22%, transparent 24%);
+  background-size: 12px 12px, 12px 12px;
+  background-position: 0 0, 6px 6px;
+}
+@utility halftone-plasma {
+  background-color: #524ae9;
+  background-image:
+    radial-gradient(circle, #fc5000 24%, transparent 26%),
+    radial-gradient(circle, #fc5000 24%, transparent 26%);
+  background-size: 14px 14px, 14px 14px;
+  background-position: 0 0, 7px 7px;
+}
+@utility dotted-divider-x {
+  background-image: radial-gradient(circle, #070607 1px, transparent 1.2px);
+  background-size: 8px 2px;
+  background-repeat: repeat-x;
+  background-position: 0 50%;
+  height: 2px;
+}
+@utility dotted-divider-y {
+  background-image: radial-gradient(circle, #070607 1px, transparent 1.2px);
+  background-size: 2px 8px;
+  background-repeat: repeat-y;
+  background-position: 50% 0;
+  width: 2px;
+}
+@utility display-type {
+  font-family: "Bebas Neue", "Anton", "Oswald", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 0.94;
+  text-transform: uppercase;
+}
+
+/* Legacy utility aliases — kept flat so existing usages inherit Caldera */
+@utility bg-hero {
+  background-color: var(--pumice);
+}
+@utility bg-plum {
+  background-color: var(--limestone);
+}
+@utility shadow-elegant {
+  box-shadow: none;
+}
+@utility shadow-glow {
+  box-shadow: none;
+}
+@utility text-gradient {
+  color: var(--ember);
+}
