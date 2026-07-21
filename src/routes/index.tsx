@@ -20,9 +20,7 @@ function Landing() {
       <header className="mx-auto max-w-[1280px] px-6 pt-6">
         <div className="flex items-center justify-between rounded-full bg-[color:var(--limestone)] px-6 py-3">
           <Link to="/" className="flex items-center gap-2">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[color:var(--obsidian)] text-[color:var(--ember)]">
-              <Sparkles className="h-4 w-4" />
-            </span>
+            <img src="/logo.png?v=2" alt="ONESHOT" className="h-8 w-auto shrink-0" />
             <span className="font-serif text-[22px] tracking-[0.04em]">ONESHOT</span>
           </Link>
           <nav className="hidden items-center gap-2 md:flex">

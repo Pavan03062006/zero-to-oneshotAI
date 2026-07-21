@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
-import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -24,9 +23,7 @@ function AuthPage() {
         {/* Halftone panel */}
         <div className="halftone-hero relative hidden overflow-hidden rounded-[40px] p-10 lg:flex lg:flex-col lg:justify-between">
           <Link to="/" className="flex items-center gap-2 text-[color:var(--chalk)]">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-[color:var(--obsidian)] text-[color:var(--ember)]">
-              <Sparkles className="h-4 w-4" />
-            </span>
+            <img src="/logo.png?v=2" alt="ONESHOT" className="h-8 w-auto shrink-0" />
             <span className="font-serif text-[20px] tracking-[0.04em]">ONESHOT</span>
           </Link>
           <div>
@@ -48,9 +45,7 @@ function AuthPage() {
         <div className="flex items-center justify-center rounded-[40px] bg-[color:var(--limestone)] p-8 lg:p-14">
           <div className="w-full max-w-md">
             <Link to="/" className="mb-8 flex items-center gap-2 lg:hidden">
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-[color:var(--obsidian)] text-[color:var(--ember)]">
-                <Sparkles className="h-4 w-4" />
-              </span>
+              <img src="/logo.png?v=2" alt="ONESHOT" className="h-8 w-auto shrink-0" />
               <span className="font-serif text-[20px] tracking-[0.04em]">ONESHOT</span>
             </Link>
             <h2 className="font-serif text-[clamp(40px,7vw,64px)] leading-[0.94] tracking-[0.02em]">

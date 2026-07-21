@@ -23,7 +23,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mx-auto max-w-[1280px] px-4 pt-4 sm:px-6">
           <div className="flex items-center justify-between rounded-full bg-[color:var(--limestone)] px-4 py-2 sm:px-6">
             <Link to="/dashboard" className="flex items-center gap-2">
-              <img src="/logo.png" alt="ONESHOT" className="h-8 w-8 shrink-0" />
+              <img src="/logo.png?v=2" alt="ONESHOT" className="h-8 w-auto shrink-0" />
               <span className="font-serif text-[20px] tracking-[0.04em]">ONESHOT</span>
             </Link>
           <div className="flex items-center gap-2">
