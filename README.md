@@ -88,3 +88,7 @@ If you enjoy OneShot, consider giving this repository a ⭐ to support the proje
 > **One idea. Every universe.**
 >
 > Build worlds that remember.
+
+---
+
+### Made with ❤️ using OpenAI Codex
